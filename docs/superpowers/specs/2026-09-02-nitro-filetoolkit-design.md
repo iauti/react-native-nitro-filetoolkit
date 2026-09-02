@@ -84,7 +84,7 @@ Synchronous factory methods only allocate or return cached native objects. `open
 
 ## File locations
 
-Filesystem APIs accept a closed location union rather than ambiguous strings:
+Filesystem APIs accept a canonical location value rather than ambiguous strings:
 
 ```ts
 export type ManagedDirectory =
@@ -94,23 +94,14 @@ export type ManagedDirectory =
   | 'temporary'
   | 'application-support'
 
-export interface ManagedLocation {
-  readonly kind: 'managed'
-  readonly directory: ManagedDirectory
-  readonly relativePath: string
-}
-
-export interface UriLocation {
-  readonly kind: 'uri'
+export interface FileLocation {
   readonly uri: string
 }
-
-export type FileLocation = ManagedLocation | UriLocation
 ```
 
-`ManagedLocation.relativePath` is slash-separated, relative, and normalized. Empty segments, `.` and `..` segments, absolute paths, NUL characters, and platform separator escapes are rejected. A managed location cannot escape its selected root.
+`FileSystem.location(directory, relativePath)` constructs managed locations. The relative path is slash-separated and normalized; empty segments, `.` and `..` segments, absolute paths, NUL characters, and platform separator escapes are rejected. A managed location cannot escape its selected root.
 
-`UriLocation` supports validated `file:` URIs and platform-owned content/document URIs where the operation and platform permit them. Remote HTTP URLs are never file locations.
+`FileSystem.fromUri(uri)` validates `file:` URIs and platform-owned content/document URIs where the operation and platform permit them. Remote HTTP URLs are never file locations. Nitro 0.37.1 cannot represent single string-literal discriminants inside value structs, so construction methods preserve the stronger invariant without an optional-field union at the native seam.
 
 ## Filesystem contract
 
@@ -122,7 +113,8 @@ export interface FileSystem
   location(
     directory: ManagedDirectory,
     relativePath: string,
-  ): ManagedLocation
+  ): FileLocation
+  fromUri(uri: string): FileLocation
 
   stat(location: FileLocation): Promise<FileInfo | undefined>
   list(options: ListOptions): Promise<FilePage>
@@ -143,7 +135,7 @@ export interface FileSystem
 }
 ```
 
-All I/O is asynchronous. Whole-value text reads require a bound and fail before allocating beyond the configured limit. Large binary access uses `FileReader` and `FileWriter` HybridObjects with bounded `ArrayBuffer` chunks. Asynchronous native writers copy JS-owned buffers before retaining them.
+All I/O is asynchronous. Whole-value text reads require a bound and fail before allocating beyond the configured limit. Large binary access uses `FileReader` and `FileWriter` HybridObjects with bounded `ArrayBuffer` chunks. Asynchronous native writers copy JS-owned buffers before retaining them. Byte counts and offsets use Nitro's `UInt64` TypeScript brand so JavaScript uses bigint values with explicit native signedness.
 
 Mutations declare collision behavior. Atomic replacement can be `required`, `preferred`, or `none`. A cross-volume move stages and verifies the destination before removing the source. Failure leaves the original intact and removes incomplete output.
 

@@ -1,0 +1,15 @@
+{
+  "name": "react-native-nitro-filetoolkit-root",
+  "private": true,
+  "packageManager": "bun@1.3.3",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "bun run --cwd packages/react-native-nitro-filetoolkit typescript",
+    "specs": "bun run --cwd packages/react-native-nitro-filetoolkit specs",
+    "test": "bun run --cwd packages/react-native-nitro-filetoolkit test",
+    "typecheck": "bun run --cwd packages/react-native-nitro-filetoolkit typecheck"
+  }
+}

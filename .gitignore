@@ -1,0 +1,8 @@
+node_modules/
+lib/
+android/build/
+ios/Pods/
+*.xcworkspace/xcuserdata/
+.DS_Store
+.worktrees/
+

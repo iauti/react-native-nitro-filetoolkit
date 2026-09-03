@@ -25,11 +25,7 @@ data class DiskSpace(
   @Keep
   val totalByteCount: Long
 ) {
-  /**
-   * Create a new instance of DiskSpace from Kotlin
-   */
-  constructor(availableByteCount: ULong, totalByteCount: ULong):
-         this(availableByteCount.toLong(), totalByteCount.toLong())
+  /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

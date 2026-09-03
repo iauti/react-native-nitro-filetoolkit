@@ -1,0 +1,38 @@
+diff --git a/lib/syntax/kotlin/KotlinStruct.js b/lib/syntax/kotlin/KotlinStruct.js
+index 17c521dead23304860f7450e8825a241d41b96ed..ab22b8cbc61cb46acc0c30e5d93e51c590ecc09f 100644
+--- a/lib/syntax/kotlin/KotlinStruct.js
++++ b/lib/syntax/kotlin/KotlinStruct.js
+@@ -160,6 +160,13 @@ function createKotlinConstructor(structType) {
+         type: new KotlinCxxBridgedType(p),
+     }));
+     const needsSpecialHandling = bridgedProperties.some(({ type }) => type.needsSpecialHandling);
++    // ULong and Long have the same JVM signature. A secondary constructor that
++    // only changes a Long bridge field to ULong cannot coexist with the primary
++    // constructor, so callers must use the bridge-safe Long constructor.
++    const hasUnsignedLongSignatureClash = structType.properties.some((property) => property.getCode('kotlin') === 'ULong');
++    if (hasUnsignedLongSignatureClash) {
++        return `/* primary constructor */`;
++    }
+     if (needsSpecialHandling) {
+         const kotlinParams = structType.properties.map((p) => `${p.escapedName}: ${p.getCode('kotlin')}`);
+         const paramsForward = bridgedProperties.map(({ name, type }) => type.parseFromKotlinToCpp(name, 'kotlin'));
+diff --git a/src/syntax/kotlin/KotlinStruct.ts b/src/syntax/kotlin/KotlinStruct.ts
+index b42449193bc4181560e2c8a1b97cb2698252c824..9d89e68294611ffb42e78f8fd37e519de7236fbe 100644
+--- a/src/syntax/kotlin/KotlinStruct.ts
++++ b/src/syntax/kotlin/KotlinStruct.ts
+@@ -188,6 +188,15 @@ function createKotlinConstructor(structType: StructType): string {
+   const needsSpecialHandling = bridgedProperties.some(
+     ({ type }) => type.needsSpecialHandling
+   )
++  // ULong and Long have the same JVM signature. A secondary constructor that
++  // only changes a Long bridge field to ULong cannot coexist with the primary
++  // constructor, so callers must use the bridge-safe Long constructor.
++  const hasUnsignedLongSignatureClash = structType.properties.some(
++    (property) => property.getCode('kotlin') === 'ULong'
++  )
++  if (hasUnsignedLongSignatureClash) {
++    return `/* primary constructor */`
++  }
+   if (needsSpecialHandling) {
+     const kotlinParams = structType.properties.map(
+       (p) => `${p.escapedName}: ${p.getCode('kotlin')}`

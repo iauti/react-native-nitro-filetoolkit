@@ -25,11 +25,7 @@ data class ClearResult(
   @Keep
   val reclaimedByteCount: Long
 ) {
-  /**
-   * Create a new instance of ClearResult from Kotlin
-   */
-  constructor(removedEntryCount: ULong, reclaimedByteCount: ULong):
-         this(removedEntryCount.toLong(), reclaimedByteCount.toLong())
+  /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

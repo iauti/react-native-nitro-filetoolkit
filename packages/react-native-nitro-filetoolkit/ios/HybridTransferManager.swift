@@ -1,0 +1,2 @@
+final class HybridTransferManager: HybridTransferManagerSpec {
+}

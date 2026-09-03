@@ -28,11 +28,7 @@ data class ReadChunk(
   @Keep
   val isEndOfFile: Boolean
 ) {
-  /**
-   * Create a new instance of ReadChunk from Kotlin
-   */
-  constructor(data: ArrayBuffer, offset: ULong, isEndOfFile: Boolean):
-         this(data, offset.toLong(), isEndOfFile)
+  /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

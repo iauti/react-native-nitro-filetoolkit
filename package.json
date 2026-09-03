@@ -8,8 +8,12 @@
   ],
   "scripts": {
     "build": "bun run --cwd packages/react-native-nitro-filetoolkit typescript",
+    "lint": "bun run --cwd packages/react-native-nitro-filetoolkit lint-ci && bun run --cwd apps/example lint",
     "specs": "bun run --cwd packages/react-native-nitro-filetoolkit specs",
     "test": "bun run --cwd packages/react-native-nitro-filetoolkit test",
     "typecheck": "bun run --cwd packages/react-native-nitro-filetoolkit typecheck"
+  },
+  "patchedDependencies": {
+    "nitrogen@0.37.1": "patches/nitrogen@0.37.1.patch"
   }
 }

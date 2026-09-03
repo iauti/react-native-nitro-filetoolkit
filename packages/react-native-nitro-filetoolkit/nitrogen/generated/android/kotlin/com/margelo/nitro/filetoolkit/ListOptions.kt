@@ -31,11 +31,7 @@ data class ListOptions(
   @Keep
   val recursive: Boolean
 ) {
-  /**
-   * Create a new instance of ListOptions from Kotlin
-   */
-  constructor(directory: FileLocation, cursor: String?, maxEntryCount: ULong, recursive: Boolean):
-         this(directory, cursor, maxEntryCount.toLong(), recursive)
+  /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

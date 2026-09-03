@@ -28,11 +28,7 @@ data class ReadTextOptions(
   @Keep
   val maxByteCount: Long
 ) {
-  /**
-   * Create a new instance of ReadTextOptions from Kotlin
-   */
-  constructor(source: FileLocation, encoding: TextEncoding, maxByteCount: ULong):
-         this(source, encoding, maxByteCount.toLong())
+  /* primary constructor */
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

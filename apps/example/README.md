@@ -19,9 +19,9 @@ After the native app is installed, `bun run start` starts Metro for the existing
 development build. Expo Go is not supported because the toolkit contains custom
 Swift and Kotlin code.
 
-The home route performs a native round trip: atomic UTF-8 write, bounded read,
-metadata lookup, and SHA-256 hashing. The Explore route is retained to exercise
-Expo Router navigation.
+The single home route is a filesystem playground with four runnable workflows:
+text round-trip, metadata and listing, copy/move/remove, and disk-space cleanup.
+There are no starter tabs or placeholder routes.
 
 The project uses Expo Continuous Native Generation. The `ios` and `android`
 directories can be regenerated with:
@@ -39,5 +39,5 @@ bunx expo-doctor
 ```
 
 `bun run harness -- --harnessRunner ios` and
-`bun run harness -- --harnessRunner android` run the native behavior suite when
-the corresponding simulator or emulator build is installed.
+`bun run harness -- --harnessRunner android` run eight native behavior checks
+when the corresponding simulator or emulator build is installed.

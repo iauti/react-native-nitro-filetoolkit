@@ -1,94 +1,152 @@
 # React Native Nitro File Toolkit
 
-A modern, type-safe native file toolkit for React Native, powered by Nitro
-Modules. This is a clean replacement for `rn-file-toolkit`, not a
-backward-compatible rewrite.
+[![CI](https://github.com/iauti/react-native-nitro-filetoolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/iauti/react-native-nitro-filetoolkit/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/react-native-nitro-filetoolkit.svg)](https://www.npmjs.com/package/react-native-nitro-filetoolkit)
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+Fast, type-safe native filesystem APIs for React Native, built with
+[Nitro Modules](https://nitro.margelo.com/). Read and write text, stream binary
+data, inspect directories, move files, calculate hashes, and manage app-owned
+storage without a legacy bridge API.
+
+This is an IAUTI Labs project and a clean successor to `rn-file-toolkit`. It
+does not preserve the old package's API.
+
+## Features
+
+- Native Swift and Kotlin implementations running work off the JS thread
+- Validated app-owned locations and absolute `file://` URIs
+- Bounded text reads and explicit UTF encodings
+- Staged streaming writers with commit and abort semantics
+- Collision, missing-file, and atomicity policies instead of boolean flags
+- Paginated directory listings, metadata, hashing, disk usage, and cleanup
+- `bigint` byte counts and offsets through Nitro's `UInt64`
+- One lazily created filesystem hybrid object
+
+## Requirements
+
+- React Native with the New Architecture enabled
+- `react-native-nitro-modules >=0.37.1 <0.38.0`
+- iOS or Android; web is not a runtime target
+- An Expo development build when using Expo; Expo Go cannot load custom native
+  modules
 
 ## Installation
+
+```bash
+npm install react-native-nitro-filetoolkit react-native-nitro-modules
+```
+
+Or with Bun:
 
 ```bash
 bun add react-native-nitro-filetoolkit react-native-nitro-modules
 ```
 
-This is a native module, so Expo apps must use a development build. It cannot
-run in Expo Go.
+For a bare React Native iOS application, install pods after adding the package:
 
-## Filesystem API
+```bash
+cd ios && pod install
+```
+
+For Expo, install the native dependencies and create a development build:
+
+```bash
+npx expo install react-native-nitro-filetoolkit react-native-nitro-modules
+npx expo prebuild
+npx expo run:ios
+# or: npx expo run:android
+```
+
+## Quick start
 
 ```ts
 import { FileToolkit } from 'react-native-nitro-filetoolkit'
 
 const files = FileToolkit.getFileSystem()
-const report = files.location('documents', 'reports/annual.txt')
+const note = files.location('documents', 'notes/hello.txt')
 
 await files.writeText({
-  destination: report,
-  text: 'Annual report',
+  destination: note,
+  text: 'Hello from Nitro',
   encoding: 'utf-8',
   mode: 'replace',
   atomicity: 'preferred',
   createParentDirectories: true,
 })
 
-const info = await files.stat(report)
-const contents = await files.readText({
-  source: report,
+const text = await files.readText({
+  source: note,
   encoding: 'utf-8',
   maxByteCount: 1_048_576n,
 })
+
+const info = await files.stat(note)
+const sha256 = await files.hash({ source: note, algorithm: 'sha-256' })
 ```
 
-The current milestone implements managed locations, URI validation, metadata,
-bounded text reads, atomic writes, streaming readers and writers, directory
-listing, copy/move/remove, hashing, disk-space reporting, and managed-directory
-cleanup on iOS and Android.
+`location()` accepts a managed root plus a portable relative path. Use
+`fromUri()` to validate an absolute external `file://` URI before passing it to
+another operation.
 
-Byte counts and offsets use Nitro's `UInt64`, represented as `bigint` in
-TypeScript. Operations use explicit policies for collisions, missing files,
-write mode, and atomicity instead of ambiguous booleans or overloaded strings.
+## Streaming binary data
 
-## Architecture
+Readers and writers own native resources. Close them in `finally` blocks. A
+writer changes the destination only after `commit()` succeeds; `abort()` or
+`close()` discards its staging file.
 
-Only `FileToolkitFactory` is registered eagerly. Domain objects are created or
-opened on demand:
+```ts
+const source = files.location('cache', 'input.bin')
+const destination = files.location('documents', 'output.bin')
+const reader = await files.openReader(source)
+const writer = await files.openWriter({
+  destination,
+  mode: 'replace',
+  atomicity: 'preferred',
+  createParentDirectories: true,
+})
 
-- `getFileSystem()` returns a cached, lazily created filesystem.
-- `openTransferManager()` resolves the cached, lazily created transfer service.
-- `getArchiveManager()` and `getContentManager()` return lazy domain services.
-- `openCookieStore()` creates an explicitly scoped cookie store.
+try {
+  while (true) {
+    const chunk = await reader.read(64n * 1024n)
+    if (chunk.data.byteLength > 0) await writer.write(chunk.data)
+    if (chunk.isEndOfFile) break
+  }
+  await writer.commit()
+} catch (error) {
+  await writer.abort()
+  throw error
+} finally {
+  reader.close()
+  writer.close()
+}
+```
 
-The filesystem is implemented. Transfer, archive, content, and cookie APIs are
-currently typed domain boundaries for subsequent milestones; they should not be
-treated as feature-complete yet.
+## Documentation
 
-See the [approved design](docs/superpowers/specs/2026-09-02-nitro-filetoolkit-design.md),
-[native implementation plan](docs/superpowers/plans/2026-09-02-native-filesystem.md),
-and [upstream analysis](docs/research/rn-file-toolkit-nitro-analysis.md).
+- [API reference](docs/API.md)
+- [Troubleshooting](docs/TROUBLESHOOTING.md)
+- [Example application](apps/example/README.md)
+- [Contributing](CONTRIBUTING.md)
+- [Release process](docs/RELEASING.md)
+- [Security policy](SECURITY.md)
 
-## Repository development
+## Development
 
 ```bash
 bun install
 bun run specs
 bun run test
 bun run typecheck
+bun run lint
 bun run build
-
-cd apps/example
-bun run ios
-# or
-bun run android
+bun run package:check
 ```
 
-The example uses Expo SDK 57, Expo Router with typed routes, React Native 0.86,
-and an Expo development client. Native folders are generated with Expo
-prebuild and intentionally stay out of version control.
+The Expo Router example is in `apps/example`. Generated iOS and Android example
+projects intentionally remain untracked and can be recreated with Expo
+prebuild.
 
-## Platform support
+## License
 
-- iOS: Swift
-- Android: Kotlin
-- React Native New Architecture through Nitro Modules
-
-This repository is pre-release and its native behavior is being delivered in
-independently testable milestones.
+MIT © IAUTI Labs

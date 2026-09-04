@@ -7,6 +7,15 @@ final class FileMetadataMapper {
     self.fileManager = fileManager
   }
 
+  func exists(at url: URL) -> Bool {
+    (try? fileManager.attributesOfItem(atPath: url.path)) != nil
+  }
+
+  func isDirectory(at url: URL) -> Bool {
+    let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+    return attributes?[.type] as? FileAttributeType == .typeDirectory
+  }
+
   func info(for url: URL) throws -> FileInfo {
     let attributes = try fileManager.attributesOfItem(atPath: url.path)
     let type = attributes[.type] as? FileAttributeType

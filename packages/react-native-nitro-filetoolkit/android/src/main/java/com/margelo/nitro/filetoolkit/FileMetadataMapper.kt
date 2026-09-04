@@ -16,6 +16,12 @@ internal class FileMetadataMapper {
     false
   }
 
+  fun isDirectory(file: File): Boolean = try {
+    OsConstants.S_ISDIR(Os.lstat(file.path).st_mode)
+  } catch (_: ErrnoException) {
+    false
+  }
+
   fun info(file: File): FileInfo {
     val stat = try {
       Os.lstat(file.path)
@@ -51,7 +57,7 @@ internal class FileMetadataMapper {
   }
 
   private fun uriLocation(file: File): FileLocation {
-    val canonical = file.canonicalFile
-    return FileLocation(FileLocationOrigin.URI, Uri.fromFile(canonical.absoluteFile).toString())
+    val absolute = file.absoluteFile.normalize()
+    return FileLocation(FileLocationOrigin.URI, Uri.fromFile(absolute).toString())
   }
 }

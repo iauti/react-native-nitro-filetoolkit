@@ -27,7 +27,7 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
 
   override fun list(options: ListOptions): Promise<FilePage> = Promise.parallel {
     val directory = resolver.file(options.directory)
-    if (!directory.isDirectory) {
+    if (!metadata.isDirectory(directory)) {
       throw FileToolkitException.invalidOperation("location is not a directory")
     }
     val limit = checkedInt(options.maxEntryCount.toULong(), "maxEntryCount")
@@ -184,18 +184,15 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun getDiskSpace(directory: ManagedDirectory): Promise<DiskSpace> = Promise.parallel {
-    val root = resolver.root(directory)
-    if (!root.exists() && !root.mkdirs()) {
-      throw FileToolkitException.invalidOperation("managed directory is unavailable")
-    }
+    val root = resolver.existingRootOrAncestor(directory)
     DiskSpace(root.usableSpace, root.totalSpace)
   }
 
   override fun clearManagedDirectory(
     options: ClearManagedDirectoryOptions,
   ): Promise<ClearResult> = Promise.parallel {
-    val root = resolver.root(options.directory)
-    if (!root.exists()) return@parallel ClearResult(0L, 0L)
+    val root = resolver.safeRoot(options.directory)
+    if (!metadata.exists(root)) return@parallel ClearResult(0L, 0L)
     var removed = 0L
     var reclaimed = 0L
     root.listFiles().orEmpty().forEach { entry ->
@@ -211,7 +208,7 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   private fun recursiveChildren(directory: File): List<File> = buildList {
     visibleChildren(directory).forEach { child ->
       add(child)
-      if (child.isDirectory) addAll(recursiveChildren(child))
+      if (metadata.isDirectory(child)) addAll(recursiveChildren(child))
     }
   }
 

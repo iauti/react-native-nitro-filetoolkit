@@ -34,23 +34,68 @@ describe('FileToolkit filesystem', () => {
     expect(() => files.fromUri('file:///tmp/raw space.txt')).toThrow(
       '[file-toolkit/invalid-location]',
     );
+    expect(() => files.fromUri('file:///tmp/file.txt?download=1')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
+    expect(() => files.fromUri('file:///tmp/file.txt#fragment')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
+    expect(() => files.fromUri('file:///tmp/encoded%2Fseparator')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
+    expect(() => files.fromUri('file:///tmp/encoded%5Cseparator')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
+    expect(() => files.fromUri('file:///tmp/encoded%00nul')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
     expect(files.fromUri('file:///tmp/valid%20name.txt').uri).toBe(
       'file:///tmp/valid%20name.txt',
     );
   });
 
   it('returns managed roots and canonical local file URIs', () => {
+    const managedDirectories = [
+      'cache',
+      'documents',
+      'downloads',
+      'temporary',
+      'application-support',
+    ] as const;
+    const roots = managedDirectories.map(directory => files.root(directory));
     const documents = files.root('documents');
-    const cache = files.root('cache');
     const document = files.location('documents', 'reports/annual.pdf');
 
-    expect(documents.origin).toBe('managed');
-    expect(cache.origin).toBe('managed');
-    expect(documents.uri.startsWith('file:///')).toBe(true);
-    expect(cache.uri.startsWith('file:///')).toBe(true);
+    for (const root of roots) {
+      expect(root.origin).toBe('managed');
+      expect(root.uri.startsWith('file:///')).toBe(true);
+    }
     expect(
       document.uri.startsWith(documents.uri.replace(/\/$/, '') + '/'),
     ).toBe(true);
+  });
+
+  it('does not create managed roots during path-only operations', async () => {
+    const downloads = files.root('downloads');
+    await files.remove({
+      location: downloads,
+      recursive: true,
+      missing: 'ignore',
+    });
+
+    const child = files.location('downloads', 'missing.txt');
+    expect(await files.stat(downloads)).toBeUndefined();
+    expect(await files.stat(child)).toBeUndefined();
+    const cleared = await files.clearManagedDirectory({
+      directory: 'downloads',
+      recursive: true,
+    });
+    expect(cleared.removedEntryCount).toBe(0n);
+    expect(cleared.reclaimedByteCount).toBe(0n);
+    expect((await files.getDiskSpace('downloads')).totalByteCount > 0n).toBe(
+      true,
+    );
+    expect(await files.stat(downloads)).toBeUndefined();
   });
 
   it('writes, reads, lists, hashes, copies, moves, and removes files', async () => {

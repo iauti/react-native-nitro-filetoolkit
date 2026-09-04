@@ -32,9 +32,9 @@ final class HybridFileSystem: HybridFileSystemSpec {
   }
 
   func stat(location: FileLocation) throws -> Promise<FileInfo?> {
-    Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
+    Promise.parallel(Self.ioQueue) { [resolver, metadata] in
       let url = try resolver.url(from: location)
-      guard fileManager.fileExists(atPath: url.path) else { return nil }
+      guard metadata.exists(at: url) else { return nil }
       return try metadata.info(for: url)
     }
   }
@@ -42,6 +42,9 @@ final class HybridFileSystem: HybridFileSystemSpec {
   func list(options: ListOptions) throws -> Promise<FilePage> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
       let directory = try resolver.url(from: options.directory)
+      guard metadata.isDirectory(at: directory) else {
+        throw FileToolkitError.invalidOperation("location is not a directory")
+      }
       let limit = try Self.checkedInt(options.maxEntryCount, name: "maxEntryCount")
       guard limit > 0 else {
         throw FileToolkitError.invalidOperation("maxEntryCount must be greater than zero")
@@ -204,14 +207,13 @@ final class HybridFileSystem: HybridFileSystemSpec {
   }
 
   func remove(options: RemoveOptions) throws -> Promise<Void> {
-    Promise.parallel(Self.ioQueue) { [resolver, fileManager] in
+    Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
       let url = try resolver.url(from: options.location)
-      var isDirectory: ObjCBool = false
-      guard fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
+      guard metadata.exists(at: url) else {
         if options.missing == .ignore { return }
         throw FileToolkitError.invalidOperation("location does not exist")
       }
-      if isDirectory.boolValue && !options.recursive {
+      if metadata.isDirectory(at: url) && !options.recursive {
         let entries = try fileManager.contentsOfDirectory(atPath: url.path)
         guard entries.isEmpty else {
           throw FileToolkitError.invalidOperation("directory is not empty; set recursive to true")
@@ -229,7 +231,7 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func getDiskSpace(directory: ManagedDirectory) throws -> Promise<DiskSpace> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      let root = try resolver.rootURL(for: directory)
+      let root = try resolver.existingRootOrAncestor(for: directory)
       let values = try root.resourceValues(forKeys: [
         .volumeAvailableCapacityForImportantUsageKey,
         .volumeTotalCapacityKey,
@@ -241,9 +243,9 @@ final class HybridFileSystem: HybridFileSystemSpec {
   }
 
   func clearManagedDirectory(options: ClearManagedDirectoryOptions) throws -> Promise<ClearResult> {
-    Promise.parallel(Self.ioQueue) { [resolver, fileManager] in
-      let root = try resolver.rootURL(for: options.directory)
-      guard fileManager.fileExists(atPath: root.path) else {
+    Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
+      let root = try resolver.safeRootURL(for: options.directory)
+      guard metadata.exists(at: root) else {
         return ClearResult(removedEntryCount: 0, reclaimedByteCount: 0)
       }
       let entries = try fileManager.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)
@@ -355,7 +357,8 @@ final class HybridFileSystem: HybridFileSystemSpec {
     var count: UInt64 = 1
     let attributes = try? fileManager.attributesOfItem(atPath: url.path)
     var bytes = (attributes?[.size] as? NSNumber)?.uint64Value ?? 0
-    if let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: nil) {
+    if attributes?[.type] as? FileAttributeType == .typeDirectory,
+       let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: nil) {
       for case let child as URL in enumerator {
         count += 1
         let childAttributes = try? fileManager.attributesOfItem(atPath: child.path)

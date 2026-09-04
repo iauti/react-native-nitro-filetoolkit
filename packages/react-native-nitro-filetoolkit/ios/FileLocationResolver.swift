@@ -26,7 +26,7 @@ final class FileLocationResolver {
 
     let root = try rootURL(for: directory).standardizedFileURL
     let candidate = root.appendingPathComponent(relativePath, isDirectory: false).standardizedFileURL
-    guard candidate.path.hasPrefix(root.path + "/") else {
+    guard try isContainedByRoot(root, candidate: candidate) else {
       throw FileToolkitError.invalidLocation("relativePath escapes its managed directory")
     }
     return location(for: candidate, origin: .managed)
@@ -36,7 +36,7 @@ final class FileLocationResolver {
     let url = try url(fromUri: location.uri)
     if location.origin == .managed {
       let contained = try managedRootURLs().contains { root in
-        url == root || url.path.hasPrefix(root.path + "/")
+        try isContainedByRoot(root, candidate: url)
       }
       guard contained else {
         throw FileToolkitError.invalidLocation("managed location is outside all managed directories")
@@ -50,13 +50,33 @@ final class FileLocationResolver {
   }
 
   func root(_ directory: ManagedDirectory) throws -> FileLocation {
-    let url = try rootURL(for: directory)
+    let url = try safeRootURL(for: directory)
     do {
       try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
+      let attributes = try fileManager.attributesOfItem(atPath: url.path)
+      guard attributes[.type] as? FileAttributeType == .typeDirectory else {
+        throw FileToolkitError.invalidOperation("managed directory is unavailable")
+      }
     } catch {
       throw FileToolkitError.invalidOperation("managed directory is unavailable: \(error.localizedDescription)")
     }
     return location(for: url, origin: .managed)
+  }
+
+  func safeRootURL(for directory: ManagedDirectory) throws -> URL {
+    let root = try rootURL(for: directory).standardizedFileURL
+    guard !isSymbolicLink(root) else {
+      throw FileToolkitError.invalidLocation("managed directory cannot be a symbolic link")
+    }
+    return root
+  }
+
+  func existingRootOrAncestor(for directory: ManagedDirectory) throws -> URL {
+    let root = try rootURL(for: directory).standardizedFileURL
+    guard let boundary = managedRootBoundary(root) else {
+      throw FileToolkitError.invalidLocation("managed directory cannot be a symbolic link")
+    }
+    return boundary
   }
 
   func rootURL(for directory: ManagedDirectory) throws -> URL {
@@ -93,8 +113,12 @@ final class FileLocationResolver {
     while index < bytes.count {
       if bytes[index] == 0x25 {
         guard index + 2 < bytes.count,
-              isHexDigit(bytes[index + 1]),
-              isHexDigit(bytes[index + 2]) else {
+              let high = hexValue(bytes[index + 1]),
+              let low = hexValue(bytes[index + 2]) else {
+          return false
+        }
+        let decoded = high * 16 + low
+        guard decoded != 0x2F, decoded != 0x5C, decoded != 0 else {
           return false
         }
         index += 3
@@ -108,10 +132,13 @@ final class FileLocationResolver {
     return true
   }
 
-  private func isHexDigit(_ byte: UInt8) -> Bool {
-    (0x30...0x39).contains(byte) ||
-      (0x41...0x46).contains(byte) ||
-      (0x61...0x66).contains(byte)
+  private func hexValue(_ byte: UInt8) -> UInt8? {
+    switch byte {
+    case 0x30...0x39: return byte - 0x30
+    case 0x41...0x46: return byte - 0x41 + 10
+    case 0x61...0x66: return byte - 0x61 + 10
+    default: return nil
+    }
   }
 
   private func managedRootURLs() throws -> [URL] {
@@ -122,6 +149,42 @@ final class FileLocationResolver {
       .temporary,
       .applicationSupport,
     ].map { try rootURL(for: $0).standardizedFileURL }
+  }
+
+  private func isContainedByRoot(_ root: URL, candidate: URL) throws -> Bool {
+    guard contains(root, candidate: candidate) else { return false }
+    guard let boundary = managedRootBoundary(root) else { return false }
+    if candidate == root { return true }
+    let parent = candidate.deletingLastPathComponent()
+    let resolvedParent = nearestExistingAncestor(parent).resolvingSymlinksInPath().standardizedFileURL
+    return contains(boundary, candidate: resolvedParent)
+  }
+
+  private func managedRootBoundary(_ root: URL) -> URL? {
+    guard !isSymbolicLink(root) else { return nil }
+    return nearestExistingAncestor(root).resolvingSymlinksInPath().standardizedFileURL
+  }
+
+  private func nearestExistingAncestor(_ url: URL) -> URL {
+    var current = url.standardizedFileURL
+    while !pathEntryExists(current) && current.path != "/" {
+      current.deleteLastPathComponent()
+    }
+    return current
+  }
+
+  private func pathEntryExists(_ url: URL) -> Bool {
+    (try? fileManager.attributesOfItem(atPath: url.path)) != nil
+  }
+
+  private func isSymbolicLink(_ url: URL) -> Bool {
+    let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+    return attributes?[.type] as? FileAttributeType == .typeSymbolicLink
+  }
+
+  private func contains(_ root: URL, candidate: URL) -> Bool {
+    let prefix = root.path == "/" ? "/" : root.path + "/"
+    return candidate == root || candidate.path.hasPrefix(prefix)
   }
 
   private func location(for url: URL, origin: FileLocationOrigin) -> FileLocation {

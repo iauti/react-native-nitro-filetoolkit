@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/iauti/react-native-nitro-filetoolkit/security/advisories/new
+    about: Privately report vulnerabilities and coordinate disclosure.
+  - name: Documentation and troubleshooting
+    url: https://github.com/iauti/react-native-nitro-filetoolkit/blob/main/docs/TROUBLESHOOTING.md
+    about: Review installation, Expo, path, streaming, and native-build guidance.

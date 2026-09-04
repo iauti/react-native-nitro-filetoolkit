@@ -1,0 +1,81 @@
+name: Feature or API proposal
+description: Propose a focused capability or public API improvement.
+title: "[Proposal]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before proposing a new domain, review the README roadmap. Public APIs
+        ship only with complete iOS and Android behavior and tests.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the concrete user problem, without prescribing an implementation.
+      placeholder: I need to… because…
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Explain the observable behavior, lifecycle, limits, and failure cases.
+    validations:
+      required: true
+
+  - type: textarea
+    id: api
+    attributes:
+      label: Suggested TypeScript API
+      description: Show how an application would use the API. Option objects and explicit policies are preferred.
+      render: typescript
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe current workarounds or other designs you considered.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Filesystem
+        - Transfers
+        - Archives
+        - OS integrations
+        - Cookies
+        - React adapters
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Target platforms
+      multiple: true
+      options:
+        - iOS
+        - Android
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Scope checks
+      options:
+        - label: This proposal describes production behavior, not placeholder exports or no-op native methods.
+          required: true
+        - label: I searched existing issues and the roadmap for this proposal.
+          required: true

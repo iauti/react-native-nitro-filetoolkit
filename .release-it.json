@@ -1,0 +1,38 @@
+{
+  "$schema": "https://unpkg.com/release-it@21/schema/release-it.json",
+  "npm": {
+    "publish": false
+  },
+  "git": {
+    "commitMessage": "chore: release ${version}",
+    "tagName": "v${version}",
+    "requireCleanWorkingDir": false
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}"
+  },
+  "hooks": {
+    "before:init": "bun run check:ci",
+    "after:bump": "bun install && git add package.json packages/react-native-nitro-filetoolkit/package.json apps/example/package.json bun.lock"
+  },
+  "plugins": {
+    "@release-it/bumper": {
+      "out": [
+        {
+          "file": "packages/react-native-nitro-filetoolkit/package.json",
+          "path": "version"
+        },
+        {
+          "file": "apps/example/package.json",
+          "path": "version"
+        }
+      ]
+    },
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits"
+      }
+    }
+  }
+}

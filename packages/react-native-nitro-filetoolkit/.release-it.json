@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/release-it@21/schema/release-it.json",
+  "git": {
+    "requireCleanWorkingDir": false,
+    "requireUpstream": false,
+    "commit": false,
+    "tag": false,
+    "push": false
+  },
+  "github": {
+    "release": false
+  },
+  "npm": {
+    "publish": true
+  },
+  "hooks": {
+    "before:init": "bun run specs && bun run test && bun run lint-ci && bun run typescript"
+  }
+}

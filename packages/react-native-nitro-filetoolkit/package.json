@@ -1,0 +1,103 @@
+{
+  "name": "react-native-nitro-filetoolkit",
+  "version": "0.0.1",
+  "description": "Fast, type-safe native filesystem APIs for React Native powered by Nitro Modules",
+  "type": "module",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "lib/index.d.ts",
+  "react-native": "src/index",
+  "source": "src/index",
+  "exports": {
+    ".": {
+      "react-native": "./src/index.ts",
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
+  "sideEffects": false,
+  "files": [
+    "src",
+    "react-native.config.js",
+    "lib",
+    "nitrogen",
+    "android/build.gradle",
+    "android/gradle.properties",
+    "android/fix-prefab.gradle",
+    "android/CMakeLists.txt",
+    "android/src",
+    "cpp",
+    "ios/**/*.h",
+    "ios/**/*.m",
+    "ios/**/*.mm",
+    "ios/**/*.cpp",
+    "ios/**/*.swift",
+    "nitro.json",
+    "*.podspec",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf android/build node_modules/**/android/build lib",
+    "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
+    "lint-ci": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --max-warnings 0",
+    "release": "release-it",
+    "test": "tsc -p tests/tsconfig.json --noEmit",
+    "typescript": "tsc",
+    "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\"",
+    "prepack": "bun run specs && bun run test && bun run lint-ci && bun run typescript"
+  },
+  "keywords": [
+    "react-native",
+    "react-native-library",
+    "nitro-modules",
+    "nitro",
+    "filesystem",
+    "file-system",
+    "file-io",
+    "download",
+    "upload",
+    "ios",
+    "android"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iauti/react-native-nitro-filetoolkit.git"
+  },
+  "author": "IAUTI Labs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iauti/react-native-nitro-filetoolkit/issues"
+  },
+  "homepage": "https://github.com/iauti/react-native-nitro-filetoolkit#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@react-native/eslint-config": "0.85.3",
+    "@types/react": "^19.2.15",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "nitrogen": "0.37.1",
+    "prettier": "^3.8.3",
+    "react-native-nitro-modules": "0.37.1",
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*",
+    "react-native-nitro-modules": ">=0.37.1 <0.38.0"
+  },
+  "prettier": {
+    "quoteProps": "consistent",
+    "singleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "useTabs": false,
+    "semi": false
+  }
+}

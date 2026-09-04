@@ -37,19 +37,11 @@ target_sources(
   ../nitrogen/generated/shared/c++/HybridFileSystemSpec.cpp
   ../nitrogen/generated/shared/c++/HybridFileToolkitFactorySpec.cpp
   ../nitrogen/generated/shared/c++/HybridFileWriterSpec.cpp
-  ../nitrogen/generated/shared/c++/HybridArchiveManagerSpec.cpp
-  ../nitrogen/generated/shared/c++/HybridContentManagerSpec.cpp
-  ../nitrogen/generated/shared/c++/HybridCookieStoreSpec.cpp
-  ../nitrogen/generated/shared/c++/HybridTransferManagerSpec.cpp
   # Android-specific Nitrogen C++ sources
   ../nitrogen/generated/android/c++/JHybridFileReaderSpec.cpp
   ../nitrogen/generated/android/c++/JHybridFileSystemSpec.cpp
   ../nitrogen/generated/android/c++/JHybridFileToolkitFactorySpec.cpp
   ../nitrogen/generated/android/c++/JHybridFileWriterSpec.cpp
-  ../nitrogen/generated/android/c++/JHybridArchiveManagerSpec.cpp
-  ../nitrogen/generated/android/c++/JHybridContentManagerSpec.cpp
-  ../nitrogen/generated/android/c++/JHybridCookieStoreSpec.cpp
-  ../nitrogen/generated/android/c++/JHybridTransferManagerSpec.cpp
 )
 
 # From node_modules/react-native/ReactAndroid/cmake-utils/folly-flags.cmake

@@ -11,7 +11,6 @@ import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
 import dalvik.annotation.optimization.FastNative
-import com.margelo.nitro.core.Promise
 import com.margelo.nitro.core.HybridObject
 
 /**
@@ -33,22 +32,6 @@ abstract class HybridFileToolkitFactorySpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun getFileSystem(): HybridFileSystemSpec
-  
-  @DoNotStrip
-  @Keep
-  abstract fun openTransferManager(): Promise<HybridTransferManagerSpec>
-  
-  @DoNotStrip
-  @Keep
-  abstract fun getArchiveManager(): HybridArchiveManagerSpec
-  
-  @DoNotStrip
-  @Keep
-  abstract fun getContentManager(): HybridContentManagerSpec
-  
-  @DoNotStrip
-  @Keep
-  abstract fun openCookieStore(options: CookieStoreOptions): Promise<HybridCookieStoreSpec>
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

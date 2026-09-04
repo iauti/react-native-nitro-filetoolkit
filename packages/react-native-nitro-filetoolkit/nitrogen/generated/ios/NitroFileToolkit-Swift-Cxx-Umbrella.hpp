@@ -16,10 +16,6 @@ namespace margelo::nitro::filetoolkit { struct ClearManagedDirectoryOptions; }
 namespace margelo::nitro::filetoolkit { struct ClearResult; }
 // Forward declaration of `CollisionPolicy` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class CollisionPolicy; }
-// Forward declaration of `CookieStoreKind` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { enum class CookieStoreKind; }
-// Forward declaration of `CookieStoreOptions` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { struct CookieStoreOptions; }
 // Forward declaration of `CopyOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct CopyOptions; }
 // Forward declaration of `CreateDirectoryOptions` to properly resolve imports.
@@ -38,12 +34,6 @@ namespace margelo::nitro::filetoolkit { struct FilePage; }
 namespace margelo::nitro::filetoolkit { enum class HashAlgorithm; }
 // Forward declaration of `HashOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct HashOptions; }
-// Forward declaration of `HybridArchiveManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridArchiveManagerSpec; }
-// Forward declaration of `HybridContentManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridContentManagerSpec; }
-// Forward declaration of `HybridCookieStoreSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridCookieStoreSpec; }
 // Forward declaration of `HybridFileReaderSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileReaderSpec; }
 // Forward declaration of `HybridFileSystemSpec` to properly resolve imports.
@@ -52,8 +42,6 @@ namespace margelo::nitro::filetoolkit { class HybridFileSystemSpec; }
 namespace margelo::nitro::filetoolkit { class HybridFileToolkitFactorySpec; }
 // Forward declaration of `HybridFileWriterSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileWriterSpec; }
-// Forward declaration of `HybridTransferManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridTransferManagerSpec; }
 // Forward declaration of `ListOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct ListOptions; }
 // Forward declaration of `ManagedDirectory` to properly resolve imports.
@@ -82,8 +70,6 @@ namespace margelo::nitro::filetoolkit { struct WriteTextOptions; }
 #include "ClearManagedDirectoryOptions.hpp"
 #include "ClearResult.hpp"
 #include "CollisionPolicy.hpp"
-#include "CookieStoreKind.hpp"
-#include "CookieStoreOptions.hpp"
 #include "CopyOptions.hpp"
 #include "CreateDirectoryOptions.hpp"
 #include "DiskSpace.hpp"
@@ -93,14 +79,10 @@ namespace margelo::nitro::filetoolkit { struct WriteTextOptions; }
 #include "FilePage.hpp"
 #include "HashAlgorithm.hpp"
 #include "HashOptions.hpp"
-#include "HybridArchiveManagerSpec.hpp"
-#include "HybridContentManagerSpec.hpp"
-#include "HybridCookieStoreSpec.hpp"
 #include "HybridFileReaderSpec.hpp"
 #include "HybridFileSystemSpec.hpp"
 #include "HybridFileToolkitFactorySpec.hpp"
 #include "HybridFileWriterSpec.hpp"
-#include "HybridTransferManagerSpec.hpp"
 #include "ListOptions.hpp"
 #include "ManagedDirectory.hpp"
 #include "MissingPolicy.hpp"
@@ -132,12 +114,6 @@ namespace margelo::nitro::filetoolkit { struct WriteTextOptions; }
 #include <NitroModules/DateToChronoDate.hpp>
 
 // Forward declarations of Swift defined types
-// Forward declaration of `HybridArchiveManagerSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridArchiveManagerSpec_cxx; }
-// Forward declaration of `HybridContentManagerSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridContentManagerSpec_cxx; }
-// Forward declaration of `HybridCookieStoreSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridCookieStoreSpec_cxx; }
 // Forward declaration of `HybridFileReaderSpec_cxx` to properly resolve imports.
 namespace NitroFileToolkit { class HybridFileReaderSpec_cxx; }
 // Forward declaration of `HybridFileSystemSpec_cxx` to properly resolve imports.
@@ -146,8 +122,6 @@ namespace NitroFileToolkit { class HybridFileSystemSpec_cxx; }
 namespace NitroFileToolkit { class HybridFileToolkitFactorySpec_cxx; }
 // Forward declaration of `HybridFileWriterSpec_cxx` to properly resolve imports.
 namespace NitroFileToolkit { class HybridFileWriterSpec_cxx; }
-// Forward declaration of `HybridTransferManagerSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridTransferManagerSpec_cxx; }
 
 // Include Swift defined types
 #if __has_include("NitroFileToolkit-Swift.h")

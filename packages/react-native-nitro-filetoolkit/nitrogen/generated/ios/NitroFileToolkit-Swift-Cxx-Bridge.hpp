@@ -22,12 +22,6 @@ namespace margelo::nitro::filetoolkit { enum class FileKind; }
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
 // Forward declaration of `FilePage` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FilePage; }
-// Forward declaration of `HybridArchiveManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridArchiveManagerSpec; }
-// Forward declaration of `HybridContentManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridContentManagerSpec; }
-// Forward declaration of `HybridCookieStoreSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridCookieStoreSpec; }
 // Forward declaration of `HybridFileReaderSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileReaderSpec; }
 // Forward declaration of `HybridFileSystemSpec` to properly resolve imports.
@@ -36,18 +30,10 @@ namespace margelo::nitro::filetoolkit { class HybridFileSystemSpec; }
 namespace margelo::nitro::filetoolkit { class HybridFileToolkitFactorySpec; }
 // Forward declaration of `HybridFileWriterSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileWriterSpec; }
-// Forward declaration of `HybridTransferManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridTransferManagerSpec; }
 // Forward declaration of `ReadChunk` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct ReadChunk; }
 
 // Forward declarations of Swift defined types
-// Forward declaration of `HybridArchiveManagerSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridArchiveManagerSpec_cxx; }
-// Forward declaration of `HybridContentManagerSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridContentManagerSpec_cxx; }
-// Forward declaration of `HybridCookieStoreSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridCookieStoreSpec_cxx; }
 // Forward declaration of `HybridFileReaderSpec_cxx` to properly resolve imports.
 namespace NitroFileToolkit { class HybridFileReaderSpec_cxx; }
 // Forward declaration of `HybridFileSystemSpec_cxx` to properly resolve imports.
@@ -56,8 +42,6 @@ namespace NitroFileToolkit { class HybridFileSystemSpec_cxx; }
 namespace NitroFileToolkit { class HybridFileToolkitFactorySpec_cxx; }
 // Forward declaration of `HybridFileWriterSpec_cxx` to properly resolve imports.
 namespace NitroFileToolkit { class HybridFileWriterSpec_cxx; }
-// Forward declaration of `HybridTransferManagerSpec_cxx` to properly resolve imports.
-namespace NitroFileToolkit { class HybridTransferManagerSpec_cxx; }
 
 // Include C++ defined types
 #include "ClearResult.hpp"
@@ -66,14 +50,10 @@ namespace NitroFileToolkit { class HybridTransferManagerSpec_cxx; }
 #include "FileKind.hpp"
 #include "FileLocation.hpp"
 #include "FilePage.hpp"
-#include "HybridArchiveManagerSpec.hpp"
-#include "HybridContentManagerSpec.hpp"
-#include "HybridCookieStoreSpec.hpp"
 #include "HybridFileReaderSpec.hpp"
 #include "HybridFileSystemSpec.hpp"
 #include "HybridFileToolkitFactorySpec.hpp"
 #include "HybridFileWriterSpec.hpp"
-#include "HybridTransferManagerSpec.hpp"
 #include "ReadChunk.hpp"
 #include <NitroModules/ArrayBuffer.hpp>
 #include <NitroModules/ArrayBufferHolder.hpp>
@@ -686,122 +666,6 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
     return Result<std::shared_ptr<Promise<ClearResult>>>::withError(error);
   }
   
-  // pragma MARK: std::shared_ptr<HybridTransferManagerSpec>
-  /**
-   * Specialized version of `std::shared_ptr<HybridTransferManagerSpec>`.
-   */
-  using std__shared_ptr_HybridTransferManagerSpec_ = std::shared_ptr<HybridTransferManagerSpec>;
-  std::shared_ptr<HybridTransferManagerSpec> create_std__shared_ptr_HybridTransferManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridTransferManagerSpec_(std__shared_ptr_HybridTransferManagerSpec_ cppType);
-  
-  // pragma MARK: std::weak_ptr<HybridTransferManagerSpec>
-  using std__weak_ptr_HybridTransferManagerSpec_ = std::weak_ptr<HybridTransferManagerSpec>;
-  inline std__weak_ptr_HybridTransferManagerSpec_ weakify_std__shared_ptr_HybridTransferManagerSpec_(const std::shared_ptr<HybridTransferManagerSpec>& strong) noexcept { return strong; }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>`.
-   */
-  using std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec___ = std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>;
-  inline std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>> create_std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec___() noexcept {
-    return Promise<std::shared_ptr<HybridTransferManagerSpec>>::create();
-  }
-  inline PromiseHolder<std::shared_ptr<HybridTransferManagerSpec>> wrap_std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec___(std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>> promise) noexcept {
-    return PromiseHolder<std::shared_ptr<HybridTransferManagerSpec>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::shared_ptr<HybridTransferManagerSpec>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::shared_ptr<HybridTransferManagerSpec>&)>`.
-   */
-  using Func_void_std__shared_ptr_HybridTransferManagerSpec_ = std::function<void(const std::shared_ptr<HybridTransferManagerSpec>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::shared_ptr<HybridTransferManagerSpec>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__shared_ptr_HybridTransferManagerSpec__Wrapper final {
-  public:
-    explicit Func_void_std__shared_ptr_HybridTransferManagerSpec__Wrapper(std::function<void(const std::shared_ptr<HybridTransferManagerSpec>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::shared_ptr<HybridTransferManagerSpec>& /* result */)>>(std::move(func))) {}
-    inline void call(std::shared_ptr<HybridTransferManagerSpec> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::shared_ptr<HybridTransferManagerSpec>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__shared_ptr_HybridTransferManagerSpec_ create_Func_void_std__shared_ptr_HybridTransferManagerSpec_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__shared_ptr_HybridTransferManagerSpec__Wrapper wrap_Func_void_std__shared_ptr_HybridTransferManagerSpec_(Func_void_std__shared_ptr_HybridTransferManagerSpec_ value) noexcept {
-    return Func_void_std__shared_ptr_HybridTransferManagerSpec__Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::shared_ptr<HybridArchiveManagerSpec>
-  /**
-   * Specialized version of `std::shared_ptr<HybridArchiveManagerSpec>`.
-   */
-  using std__shared_ptr_HybridArchiveManagerSpec_ = std::shared_ptr<HybridArchiveManagerSpec>;
-  std::shared_ptr<HybridArchiveManagerSpec> create_std__shared_ptr_HybridArchiveManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridArchiveManagerSpec_(std__shared_ptr_HybridArchiveManagerSpec_ cppType);
-  
-  // pragma MARK: std::weak_ptr<HybridArchiveManagerSpec>
-  using std__weak_ptr_HybridArchiveManagerSpec_ = std::weak_ptr<HybridArchiveManagerSpec>;
-  inline std__weak_ptr_HybridArchiveManagerSpec_ weakify_std__shared_ptr_HybridArchiveManagerSpec_(const std::shared_ptr<HybridArchiveManagerSpec>& strong) noexcept { return strong; }
-  
-  // pragma MARK: std::shared_ptr<HybridContentManagerSpec>
-  /**
-   * Specialized version of `std::shared_ptr<HybridContentManagerSpec>`.
-   */
-  using std__shared_ptr_HybridContentManagerSpec_ = std::shared_ptr<HybridContentManagerSpec>;
-  std::shared_ptr<HybridContentManagerSpec> create_std__shared_ptr_HybridContentManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridContentManagerSpec_(std__shared_ptr_HybridContentManagerSpec_ cppType);
-  
-  // pragma MARK: std::weak_ptr<HybridContentManagerSpec>
-  using std__weak_ptr_HybridContentManagerSpec_ = std::weak_ptr<HybridContentManagerSpec>;
-  inline std__weak_ptr_HybridContentManagerSpec_ weakify_std__shared_ptr_HybridContentManagerSpec_(const std::shared_ptr<HybridContentManagerSpec>& strong) noexcept { return strong; }
-  
-  // pragma MARK: std::shared_ptr<HybridCookieStoreSpec>
-  /**
-   * Specialized version of `std::shared_ptr<HybridCookieStoreSpec>`.
-   */
-  using std__shared_ptr_HybridCookieStoreSpec_ = std::shared_ptr<HybridCookieStoreSpec>;
-  std::shared_ptr<HybridCookieStoreSpec> create_std__shared_ptr_HybridCookieStoreSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridCookieStoreSpec_(std__shared_ptr_HybridCookieStoreSpec_ cppType);
-  
-  // pragma MARK: std::weak_ptr<HybridCookieStoreSpec>
-  using std__weak_ptr_HybridCookieStoreSpec_ = std::weak_ptr<HybridCookieStoreSpec>;
-  inline std__weak_ptr_HybridCookieStoreSpec_ weakify_std__shared_ptr_HybridCookieStoreSpec_(const std::shared_ptr<HybridCookieStoreSpec>& strong) noexcept { return strong; }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>`.
-   */
-  using std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec___ = std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>;
-  inline std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>> create_std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec___() noexcept {
-    return Promise<std::shared_ptr<HybridCookieStoreSpec>>::create();
-  }
-  inline PromiseHolder<std::shared_ptr<HybridCookieStoreSpec>> wrap_std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec___(std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>> promise) noexcept {
-    return PromiseHolder<std::shared_ptr<HybridCookieStoreSpec>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::shared_ptr<HybridCookieStoreSpec>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::shared_ptr<HybridCookieStoreSpec>&)>`.
-   */
-  using Func_void_std__shared_ptr_HybridCookieStoreSpec_ = std::function<void(const std::shared_ptr<HybridCookieStoreSpec>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::shared_ptr<HybridCookieStoreSpec>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__shared_ptr_HybridCookieStoreSpec__Wrapper final {
-  public:
-    explicit Func_void_std__shared_ptr_HybridCookieStoreSpec__Wrapper(std::function<void(const std::shared_ptr<HybridCookieStoreSpec>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::shared_ptr<HybridCookieStoreSpec>& /* result */)>>(std::move(func))) {}
-    inline void call(std::shared_ptr<HybridCookieStoreSpec> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::shared_ptr<HybridCookieStoreSpec>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__shared_ptr_HybridCookieStoreSpec_ create_Func_void_std__shared_ptr_HybridCookieStoreSpec_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__shared_ptr_HybridCookieStoreSpec__Wrapper wrap_Func_void_std__shared_ptr_HybridCookieStoreSpec_(Func_void_std__shared_ptr_HybridCookieStoreSpec_ value) noexcept {
-    return Func_void_std__shared_ptr_HybridCookieStoreSpec__Wrapper(std::move(value));
-  }
-  
   // pragma MARK: std::shared_ptr<HybridFileToolkitFactorySpec>
   /**
    * Specialized version of `std::shared_ptr<HybridFileToolkitFactorySpec>`.
@@ -821,42 +685,6 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
   }
   inline Result_std__shared_ptr_HybridFileSystemSpec__ create_Result_std__shared_ptr_HybridFileSystemSpec__(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<HybridFileSystemSpec>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>>
-  using Result_std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec____ = Result<std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>>;
-  inline Result_std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec____ create_Result_std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec____(const std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec____ create_Result_std__shared_ptr_Promise_std__shared_ptr_HybridTransferManagerSpec____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<HybridArchiveManagerSpec>>
-  using Result_std__shared_ptr_HybridArchiveManagerSpec__ = Result<std::shared_ptr<HybridArchiveManagerSpec>>;
-  inline Result_std__shared_ptr_HybridArchiveManagerSpec__ create_Result_std__shared_ptr_HybridArchiveManagerSpec__(const std::shared_ptr<HybridArchiveManagerSpec>& value) noexcept {
-    return Result<std::shared_ptr<HybridArchiveManagerSpec>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_HybridArchiveManagerSpec__ create_Result_std__shared_ptr_HybridArchiveManagerSpec__(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<HybridArchiveManagerSpec>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<HybridContentManagerSpec>>
-  using Result_std__shared_ptr_HybridContentManagerSpec__ = Result<std::shared_ptr<HybridContentManagerSpec>>;
-  inline Result_std__shared_ptr_HybridContentManagerSpec__ create_Result_std__shared_ptr_HybridContentManagerSpec__(const std::shared_ptr<HybridContentManagerSpec>& value) noexcept {
-    return Result<std::shared_ptr<HybridContentManagerSpec>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_HybridContentManagerSpec__ create_Result_std__shared_ptr_HybridContentManagerSpec__(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<HybridContentManagerSpec>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>>
-  using Result_std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec____ = Result<std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>>;
-  inline Result_std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec____ create_Result_std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec____(const std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec____ create_Result_std__shared_ptr_Promise_std__shared_ptr_HybridCookieStoreSpec____(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>>>::withError(error);
   }
 
 } // namespace margelo::nitro::filetoolkit::bridge::swift

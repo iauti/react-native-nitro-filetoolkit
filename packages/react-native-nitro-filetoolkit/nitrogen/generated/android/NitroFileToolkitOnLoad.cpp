@@ -19,10 +19,6 @@
 #include "JHybridFileSystemSpec.hpp"
 #include "JHybridFileToolkitFactorySpec.hpp"
 #include "JHybridFileWriterSpec.hpp"
-#include "JHybridArchiveManagerSpec.hpp"
-#include "JHybridContentManagerSpec.hpp"
-#include "JHybridCookieStoreSpec.hpp"
-#include "JHybridTransferManagerSpec.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::filetoolkit {
@@ -51,10 +47,6 @@ void registerAllNatives() {
   margelo::nitro::filetoolkit::JHybridFileSystemSpec::CxxPart::registerNatives();
   margelo::nitro::filetoolkit::JHybridFileToolkitFactorySpec::CxxPart::registerNatives();
   margelo::nitro::filetoolkit::JHybridFileWriterSpec::CxxPart::registerNatives();
-  margelo::nitro::filetoolkit::JHybridArchiveManagerSpec::CxxPart::registerNatives();
-  margelo::nitro::filetoolkit::JHybridContentManagerSpec::CxxPart::registerNatives();
-  margelo::nitro::filetoolkit::JHybridCookieStoreSpec::CxxPart::registerNatives();
-  margelo::nitro::filetoolkit::JHybridTransferManagerSpec::CxxPart::registerNatives();
 
   // Register Nitro Hybrid Objects
   HybridObjectRegistry::registerHybridObjectConstructor(

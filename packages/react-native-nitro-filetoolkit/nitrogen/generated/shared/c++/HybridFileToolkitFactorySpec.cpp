@@ -15,10 +15,6 @@ namespace margelo::nitro::filetoolkit {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("getFileSystem", &HybridFileToolkitFactorySpec::getFileSystem);
-      prototype.registerHybridMethod("openTransferManager", &HybridFileToolkitFactorySpec::openTransferManager);
-      prototype.registerHybridMethod("getArchiveManager", &HybridFileToolkitFactorySpec::getArchiveManager);
-      prototype.registerHybridMethod("getContentManager", &HybridFileToolkitFactorySpec::getContentManager);
-      prototype.registerHybridMethod("openCookieStore", &HybridFileToolkitFactorySpec::openCookieStore);
     });
   }
 

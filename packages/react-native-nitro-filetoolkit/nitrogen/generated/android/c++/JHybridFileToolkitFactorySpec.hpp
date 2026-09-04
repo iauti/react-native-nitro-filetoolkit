@@ -55,10 +55,6 @@ namespace margelo::nitro::filetoolkit {
   public:
     // Methods
     std::shared_ptr<HybridFileSystemSpec> getFileSystem() override;
-    std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>> openTransferManager() override;
-    std::shared_ptr<HybridArchiveManagerSpec> getArchiveManager() override;
-    std::shared_ptr<HybridContentManagerSpec> getContentManager() override;
-    std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>> openCookieStore(const CookieStoreOptions& options) override;
 
   private:
     jni::global_ref<JHybridFileToolkitFactorySpec::JavaPart> _javaPart;

@@ -15,25 +15,9 @@
 
 // Forward declaration of `HybridFileSystemSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileSystemSpec; }
-// Forward declaration of `HybridTransferManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridTransferManagerSpec; }
-// Forward declaration of `HybridArchiveManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridArchiveManagerSpec; }
-// Forward declaration of `HybridContentManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridContentManagerSpec; }
-// Forward declaration of `HybridCookieStoreSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridCookieStoreSpec; }
-// Forward declaration of `CookieStoreOptions` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { struct CookieStoreOptions; }
 
 #include <memory>
 #include "HybridFileSystemSpec.hpp"
-#include "HybridTransferManagerSpec.hpp"
-#include <NitroModules/Promise.hpp>
-#include "HybridArchiveManagerSpec.hpp"
-#include "HybridContentManagerSpec.hpp"
-#include "HybridCookieStoreSpec.hpp"
-#include "CookieStoreOptions.hpp"
 
 namespace margelo::nitro::filetoolkit {
 
@@ -67,10 +51,6 @@ namespace margelo::nitro::filetoolkit {
     public:
       // Methods
       virtual std::shared_ptr<HybridFileSystemSpec> getFileSystem() = 0;
-      virtual std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>> openTransferManager() = 0;
-      virtual std::shared_ptr<HybridArchiveManagerSpec> getArchiveManager() = 0;
-      virtual std::shared_ptr<HybridContentManagerSpec> getContentManager() = 0;
-      virtual std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>> openCookieStore(const CookieStoreOptions& options) = 0;
 
     protected:
       // Hybrid Setup

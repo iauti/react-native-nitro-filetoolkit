@@ -9,36 +9,10 @@
 
 // Forward declaration of `HybridFileSystemSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileSystemSpec; }
-// Forward declaration of `HybridTransferManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridTransferManagerSpec; }
-// Forward declaration of `HybridArchiveManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridArchiveManagerSpec; }
-// Forward declaration of `HybridContentManagerSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridContentManagerSpec; }
-// Forward declaration of `HybridCookieStoreSpec` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { class HybridCookieStoreSpec; }
-// Forward declaration of `CookieStoreOptions` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { struct CookieStoreOptions; }
-// Forward declaration of `CookieStoreKind` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { enum class CookieStoreKind; }
 
 #include <memory>
 #include "HybridFileSystemSpec.hpp"
 #include "JHybridFileSystemSpec.hpp"
-#include "HybridTransferManagerSpec.hpp"
-#include <NitroModules/Promise.hpp>
-#include <NitroModules/JPromise.hpp>
-#include "JHybridTransferManagerSpec.hpp"
-#include "HybridArchiveManagerSpec.hpp"
-#include "JHybridArchiveManagerSpec.hpp"
-#include "HybridContentManagerSpec.hpp"
-#include "JHybridContentManagerSpec.hpp"
-#include "HybridCookieStoreSpec.hpp"
-#include "JHybridCookieStoreSpec.hpp"
-#include "CookieStoreOptions.hpp"
-#include "JCookieStoreOptions.hpp"
-#include "CookieStoreKind.hpp"
-#include "JCookieStoreKind.hpp"
 
 namespace margelo::nitro::filetoolkit {
 
@@ -77,48 +51,6 @@ namespace margelo::nitro::filetoolkit {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JHybridFileSystemSpec::JavaPart>()>("getFileSystem");
     auto __result = method(_javaPart);
     return __result->getJHybridFileSystemSpec();
-  }
-  std::shared_ptr<Promise<std::shared_ptr<HybridTransferManagerSpec>>> JHybridFileToolkitFactorySpec::openTransferManager() {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("openTransferManager");
-    auto __result = method(_javaPart);
-    return [&]() {
-      auto __promise = Promise<std::shared_ptr<HybridTransferManagerSpec>>::create();
-      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
-        auto __result = jni::static_ref_cast<JHybridTransferManagerSpec::JavaPart>(__boxedResult);
-        __promise->resolve(__result->getJHybridTransferManagerSpec());
-      });
-      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
-        jni::JniException __jniError(__throwable);
-        __promise->reject(std::make_exception_ptr(__jniError));
-      });
-      return __promise;
-    }();
-  }
-  std::shared_ptr<HybridArchiveManagerSpec> JHybridFileToolkitFactorySpec::getArchiveManager() {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JHybridArchiveManagerSpec::JavaPart>()>("getArchiveManager");
-    auto __result = method(_javaPart);
-    return __result->getJHybridArchiveManagerSpec();
-  }
-  std::shared_ptr<HybridContentManagerSpec> JHybridFileToolkitFactorySpec::getContentManager() {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JHybridContentManagerSpec::JavaPart>()>("getContentManager");
-    auto __result = method(_javaPart);
-    return __result->getJHybridContentManagerSpec();
-  }
-  std::shared_ptr<Promise<std::shared_ptr<HybridCookieStoreSpec>>> JHybridFileToolkitFactorySpec::openCookieStore(const CookieStoreOptions& options) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JCookieStoreOptions> /* options */)>("openCookieStore");
-    auto __result = method(_javaPart, JCookieStoreOptions::fromCpp(options));
-    return [&]() {
-      auto __promise = Promise<std::shared_ptr<HybridCookieStoreSpec>>::create();
-      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
-        auto __result = jni::static_ref_cast<JHybridCookieStoreSpec::JavaPart>(__boxedResult);
-        __promise->resolve(__result->getJHybridCookieStoreSpec());
-      });
-      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
-        jni::JniException __jniError(__throwable);
-        __promise->reject(std::make_exception_ptr(__jniError));
-      });
-      return __promise;
-    }();
   }
 
 } // namespace margelo::nitro::filetoolkit

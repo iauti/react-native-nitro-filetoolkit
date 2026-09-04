@@ -14,10 +14,6 @@ public protocol HybridFileToolkitFactorySpec_protocol: HybridObject {
 
   // Methods
   func getFileSystem() throws -> (any HybridFileSystemSpec)
-  func openTransferManager() throws -> Promise<(any HybridTransferManagerSpec)>
-  func getArchiveManager() throws -> (any HybridArchiveManagerSpec)
-  func getContentManager() throws -> (any HybridContentManagerSpec)
-  func openCookieStore(options: CookieStoreOptions) throws -> Promise<(any HybridCookieStoreSpec)>
 }
 
 public extension HybridFileToolkitFactorySpec_protocol {

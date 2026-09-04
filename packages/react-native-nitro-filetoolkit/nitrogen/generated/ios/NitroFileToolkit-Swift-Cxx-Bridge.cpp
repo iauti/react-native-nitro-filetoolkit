@@ -8,14 +8,10 @@
 #include "NitroFileToolkit-Swift-Cxx-Bridge.hpp"
 
 // Include C++ implementation defined types
-#include "HybridArchiveManagerSpecSwift.hpp"
-#include "HybridContentManagerSpecSwift.hpp"
-#include "HybridCookieStoreSpecSwift.hpp"
 #include "HybridFileReaderSpecSwift.hpp"
 #include "HybridFileSystemSpecSwift.hpp"
 #include "HybridFileToolkitFactorySpecSwift.hpp"
 #include "HybridFileWriterSpecSwift.hpp"
-#include "HybridTransferManagerSpecSwift.hpp"
 #include "NitroFileToolkit-Swift-Cxx-Umbrella.hpp"
 #include <NitroModules/NitroDefines.hpp>
 
@@ -155,86 +151,6 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
     #endif
     NitroFileToolkit::HybridFileSystemSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
-  }
-  
-  // pragma MARK: std::shared_ptr<HybridTransferManagerSpec>
-  std::shared_ptr<HybridTransferManagerSpec> create_std__shared_ptr_HybridTransferManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
-    NitroFileToolkit::HybridTransferManagerSpec_cxx swiftPart = NitroFileToolkit::HybridTransferManagerSpec_cxx::fromUnsafe(swiftUnsafePointer);
-    return std::make_shared<margelo::nitro::filetoolkit::HybridTransferManagerSpecSwift>(swiftPart);
-  }
-  void* NON_NULL get_std__shared_ptr_HybridTransferManagerSpec_(std__shared_ptr_HybridTransferManagerSpec_ cppType) {
-    std::shared_ptr<margelo::nitro::filetoolkit::HybridTransferManagerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::filetoolkit::HybridTransferManagerSpecSwift>(cppType);
-    #ifdef NITRO_DEBUG
-    if (swiftWrapper == nullptr) [[unlikely]] {
-      throw std::runtime_error("Class \"HybridTransferManagerSpec\" is not implemented in Swift!");
-    }
-    #endif
-    NitroFileToolkit::HybridTransferManagerSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
-    return swiftPart.toUnsafe();
-  }
-  
-  // pragma MARK: std::function<void(const std::shared_ptr<HybridTransferManagerSpec>& /* result */)>
-  Func_void_std__shared_ptr_HybridTransferManagerSpec_ create_Func_void_std__shared_ptr_HybridTransferManagerSpec_(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroFileToolkit::Func_void_std__shared_ptr_HybridTransferManagerSpec_::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<HybridTransferManagerSpec>& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
-  // pragma MARK: std::shared_ptr<HybridArchiveManagerSpec>
-  std::shared_ptr<HybridArchiveManagerSpec> create_std__shared_ptr_HybridArchiveManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
-    NitroFileToolkit::HybridArchiveManagerSpec_cxx swiftPart = NitroFileToolkit::HybridArchiveManagerSpec_cxx::fromUnsafe(swiftUnsafePointer);
-    return std::make_shared<margelo::nitro::filetoolkit::HybridArchiveManagerSpecSwift>(swiftPart);
-  }
-  void* NON_NULL get_std__shared_ptr_HybridArchiveManagerSpec_(std__shared_ptr_HybridArchiveManagerSpec_ cppType) {
-    std::shared_ptr<margelo::nitro::filetoolkit::HybridArchiveManagerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::filetoolkit::HybridArchiveManagerSpecSwift>(cppType);
-    #ifdef NITRO_DEBUG
-    if (swiftWrapper == nullptr) [[unlikely]] {
-      throw std::runtime_error("Class \"HybridArchiveManagerSpec\" is not implemented in Swift!");
-    }
-    #endif
-    NitroFileToolkit::HybridArchiveManagerSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
-    return swiftPart.toUnsafe();
-  }
-  
-  // pragma MARK: std::shared_ptr<HybridContentManagerSpec>
-  std::shared_ptr<HybridContentManagerSpec> create_std__shared_ptr_HybridContentManagerSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
-    NitroFileToolkit::HybridContentManagerSpec_cxx swiftPart = NitroFileToolkit::HybridContentManagerSpec_cxx::fromUnsafe(swiftUnsafePointer);
-    return std::make_shared<margelo::nitro::filetoolkit::HybridContentManagerSpecSwift>(swiftPart);
-  }
-  void* NON_NULL get_std__shared_ptr_HybridContentManagerSpec_(std__shared_ptr_HybridContentManagerSpec_ cppType) {
-    std::shared_ptr<margelo::nitro::filetoolkit::HybridContentManagerSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::filetoolkit::HybridContentManagerSpecSwift>(cppType);
-    #ifdef NITRO_DEBUG
-    if (swiftWrapper == nullptr) [[unlikely]] {
-      throw std::runtime_error("Class \"HybridContentManagerSpec\" is not implemented in Swift!");
-    }
-    #endif
-    NitroFileToolkit::HybridContentManagerSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
-    return swiftPart.toUnsafe();
-  }
-  
-  // pragma MARK: std::shared_ptr<HybridCookieStoreSpec>
-  std::shared_ptr<HybridCookieStoreSpec> create_std__shared_ptr_HybridCookieStoreSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
-    NitroFileToolkit::HybridCookieStoreSpec_cxx swiftPart = NitroFileToolkit::HybridCookieStoreSpec_cxx::fromUnsafe(swiftUnsafePointer);
-    return std::make_shared<margelo::nitro::filetoolkit::HybridCookieStoreSpecSwift>(swiftPart);
-  }
-  void* NON_NULL get_std__shared_ptr_HybridCookieStoreSpec_(std__shared_ptr_HybridCookieStoreSpec_ cppType) {
-    std::shared_ptr<margelo::nitro::filetoolkit::HybridCookieStoreSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::filetoolkit::HybridCookieStoreSpecSwift>(cppType);
-    #ifdef NITRO_DEBUG
-    if (swiftWrapper == nullptr) [[unlikely]] {
-      throw std::runtime_error("Class \"HybridCookieStoreSpec\" is not implemented in Swift!");
-    }
-    #endif
-    NitroFileToolkit::HybridCookieStoreSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
-    return swiftPart.toUnsafe();
-  }
-  
-  // pragma MARK: std::function<void(const std::shared_ptr<HybridCookieStoreSpec>& /* result */)>
-  Func_void_std__shared_ptr_HybridCookieStoreSpec_ create_Func_void_std__shared_ptr_HybridCookieStoreSpec_(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroFileToolkit::Func_void_std__shared_ptr_HybridCookieStoreSpec_::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<HybridCookieStoreSpec>& result) mutable -> void {
-      swiftClosure.call(result);
-    };
   }
   
   // pragma MARK: std::shared_ptr<HybridFileToolkitFactorySpec>

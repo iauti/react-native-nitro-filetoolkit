@@ -4,6 +4,7 @@ import android.system.Os
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.security.MessageDigest
 import java.util.UUID
 
@@ -29,12 +30,26 @@ internal object FileOperations {
     }
   }
 
-  fun copy(source: File, destination: File, followSymbolicLinks: Boolean) {
+  fun copyInputToFile(input: InputStream, destination: File) {
+    ensureParent(destination, true)
+    FileOutputStream(destination).use { output ->
+      input.copyTo(output, bufferSize = DEFAULT_BUFFER_SIZE)
+      output.fd.sync()
+    }
+  }
+
+  fun copy(
+    source: File,
+    destination: File,
+    followSymbolicLinks: Boolean,
+    resolveSourceForAccess: (File) -> File = { it },
+  ) {
     val sourceInfo = FileMetadataMapper().info(source)
     when (sourceInfo.kind) {
       FileKind.SYMBOLIC_LINK -> {
         if (followSymbolicLinks) {
-          copy(source.canonicalFile, destination, true)
+          // Resolve at every level so nested managed links receive the same containment check.
+          copy(resolveSourceForAccess(source), destination, true, resolveSourceForAccess)
         } else {
           ensureParent(destination, true)
           Os.symlink(Os.readlink(source.path), destination.path)
@@ -45,7 +60,7 @@ internal object FileOperations {
           throw FileToolkitException.invalidOperation("cannot create destination directory")
         }
         source.listFiles()?.forEach { child ->
-          copy(child, File(destination, child.name), followSymbolicLinks)
+          copy(child, File(destination, child.name), followSymbolicLinks, resolveSourceForAccess)
         }
       }
       FileKind.FILE -> {

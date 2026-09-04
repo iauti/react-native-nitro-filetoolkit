@@ -14,6 +14,8 @@ namespace NitroFileToolkit { class HybridFileWriterSpec_cxx; }
 
 // Forward declaration of `FileLocation` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
+// Forward declaration of `FileLocationOrigin` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileLocationOrigin; }
 // Forward declaration of `ArrayBufferHolder` to properly resolve imports.
 namespace NitroModules { class ArrayBufferHolder; }
 // Forward declaration of `FileInfo` to properly resolve imports.
@@ -22,6 +24,7 @@ namespace margelo::nitro::filetoolkit { struct FileInfo; }
 namespace margelo::nitro::filetoolkit { enum class FileKind; }
 
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include <string>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/ArrayBuffer.hpp>

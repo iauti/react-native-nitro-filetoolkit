@@ -7,6 +7,15 @@ final class FileMetadataMapper {
     self.fileManager = fileManager
   }
 
+  func exists(at url: URL) -> Bool {
+    (try? fileManager.attributesOfItem(atPath: url.path)) != nil
+  }
+
+  func isDirectory(at url: URL) -> Bool {
+    let attributes = try? fileManager.attributesOfItem(atPath: url.path)
+    return attributes?[.type] as? FileAttributeType == .typeDirectory
+  }
+
   func info(for url: URL) throws -> FileInfo {
     let attributes = try fileManager.attributesOfItem(atPath: url.path)
     let type = attributes[.type] as? FileAttributeType
@@ -26,7 +35,10 @@ final class FileMetadataMapper {
       let targetURL = target.hasPrefix("/")
         ? URL(fileURLWithPath: target)
         : url.deletingLastPathComponent().appendingPathComponent(target)
-      symbolicLinkTarget = FileLocation(uri: targetURL.standardizedFileURL.absoluteString)
+      symbolicLinkTarget = FileLocation(
+        origin: .uri,
+        uri: URL(fileURLWithPath: targetURL.standardizedFileURL.path).absoluteString
+      )
     default:
       kind = .file
       byteCount = (attributes[.size] as? NSNumber)?.uint64Value
@@ -35,7 +47,10 @@ final class FileMetadataMapper {
 
     return FileInfo(
       kind: kind,
-      location: FileLocation(uri: url.standardizedFileURL.absoluteString),
+      location: FileLocation(
+        origin: .uri,
+        uri: URL(fileURLWithPath: url.standardizedFileURL.path).absoluteString
+      ),
       name: url.lastPathComponent,
       byteCount: byteCount,
       symbolicLinkTarget: symbolicLinkTarget,

@@ -57,6 +57,22 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
     return swiftPart.toUnsafe();
   }
   
+  // pragma MARK: std::function<void(const std::optional<SourceInfo>& /* result */)>
+  Func_void_std__optional_SourceInfo_ create_Func_void_std__optional_SourceInfo_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroFileToolkit::Func_void_std__optional_SourceInfo_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::optional<SourceInfo>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const FileInfo& /* result */)>
+  Func_void_FileInfo create_Func_void_FileInfo(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroFileToolkit::Func_void_FileInfo::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const FileInfo& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void(const std::optional<FileInfo>& /* result */)>
   Func_void_std__optional_FileInfo_ create_Func_void_std__optional_FileInfo_(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroFileToolkit::Func_void_std__optional_FileInfo_::fromUnsafe(swiftClosureWrapper);
@@ -77,14 +93,6 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
   Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroFileToolkit::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
-  // pragma MARK: std::function<void(const FileInfo& /* result */)>
-  Func_void_FileInfo create_Func_void_FileInfo(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroFileToolkit::Func_void_FileInfo::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const FileInfo& result) mutable -> void {
       swiftClosure.call(result);
     };
   }

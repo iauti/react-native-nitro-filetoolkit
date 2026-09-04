@@ -10,6 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "FileLocation.hpp"
 
+#include "FileLocationOrigin.hpp"
+#include "JFileLocationOrigin.hpp"
 #include <string>
 
 namespace margelo::nitro::filetoolkit {
@@ -31,9 +33,12 @@ namespace margelo::nitro::filetoolkit {
     [[nodiscard]]
     FileLocation toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldOrigin = clazz->getField<JFileLocationOrigin>("origin");
+      jni::local_ref<JFileLocationOrigin> origin = this->getFieldValue(fieldOrigin);
       static const auto fieldUri = clazz->getField<jni::JString>("uri");
       jni::local_ref<jni::JString> uri = this->getFieldValue(fieldUri);
       return FileLocation(
+        origin->toCpp(),
         uri->toStdString()
       );
     }
@@ -44,11 +49,12 @@ namespace margelo::nitro::filetoolkit {
      */
     [[maybe_unused]]
     static jni::local_ref<JFileLocation::javaobject> fromCpp(const FileLocation& value) {
-      using JSignature = JFileLocation(jni::alias_ref<jni::JString>);
+      using JSignature = JFileLocation(jni::alias_ref<JFileLocationOrigin>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        JFileLocationOrigin::fromCpp(value.origin),
         jni::make_jstring(value.uri)
       );
     }

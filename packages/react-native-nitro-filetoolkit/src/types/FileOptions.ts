@@ -1,5 +1,9 @@
 import type { FileInfo } from './FileInfo'
-import type { FileLocation, ManagedDirectory } from './FileLocation'
+import type {
+  FileLocation,
+  FileSource,
+  ManagedDirectory,
+} from './FileLocation'
 import type { UInt64 } from 'react-native-nitro-modules'
 
 export type CollisionPolicy = 'fail' | 'replace'
@@ -58,6 +62,19 @@ export interface CopyOptions {
 
 export interface MoveOptions {
   readonly source: FileLocation
+  readonly destination: FileLocation
+  readonly collision: CollisionPolicy
+  readonly atomicity: Atomicity
+}
+
+export interface SourceInfo {
+  readonly source: FileSource
+  readonly name?: string
+  readonly byteCount?: UInt64
+}
+
+export interface ImportFileOptions {
+  readonly source: FileSource
   readonly destination: FileLocation
   readonly collision: CollisionPolicy
   readonly atomicity: Atomicity

@@ -11,8 +11,10 @@
 #include "HashOptions.hpp"
 
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "HashAlgorithm.hpp"
 #include "JFileLocation.hpp"
+#include "JFileLocationOrigin.hpp"
 #include "JHashAlgorithm.hpp"
 #include <string>
 

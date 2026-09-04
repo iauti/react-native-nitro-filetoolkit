@@ -18,10 +18,15 @@ public extension FileLocation {
   /**
    * Create a new instance of `FileLocation`.
    */
-  init(uri: String) {
-    self.init(std.string(uri))
+  init(origin: FileLocationOrigin, uri: String) {
+    self.init(origin, std.string(uri))
   }
 
+  @inline(__always)
+  var origin: FileLocationOrigin {
+    return self.__origin
+  }
+  
   @inline(__always)
   var uri: String {
     return String(self.__uri)

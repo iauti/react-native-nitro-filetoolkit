@@ -20,6 +20,9 @@ import java.util.Objects
 data class FileLocation(
   @DoNotStrip
   @Keep
+  val origin: FileLocationOrigin,
+  @DoNotStrip
+  @Keep
   val uri: String
 ) {
   /* primary constructor */
@@ -27,11 +30,13 @@ data class FileLocation(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is FileLocation) return false
-    return Objects.deepEquals(this.uri, other.uri)
+    return Objects.deepEquals(this.origin, other.origin)
+      && Objects.deepEquals(this.uri, other.uri)
   }
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      origin,
       uri
     ).contentDeepHashCode()
   }
@@ -44,8 +49,8 @@ data class FileLocation(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(uri: String): FileLocation {
-      return FileLocation(uri)
+    private fun fromCpp(origin: FileLocationOrigin, uri: String): FileLocation {
+      return FileLocation(origin, uri)
     }
   }
 }

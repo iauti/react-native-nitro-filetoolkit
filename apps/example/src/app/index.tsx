@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ExampleCard } from '@/components/example-card';
+import { ExternalSourceCard } from '@/components/external-source-card';
 import {
   ResultConsole,
   type ResultStatus,
@@ -59,6 +60,8 @@ export default function FileToolkitScreen() {
             />
           ))}
         </View>
+
+        <ExternalSourceCard />
 
         <ResultConsole status={status} output={output} />
       </ScrollView>

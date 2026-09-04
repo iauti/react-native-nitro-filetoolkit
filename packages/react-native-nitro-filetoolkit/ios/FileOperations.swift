@@ -27,6 +27,25 @@ enum FileOperations {
       .appendingPathComponent(".nitro-filetoolkit-\(UUID().uuidString).tmp")
   }
 
+  static func copyFile(
+    from source: URL,
+    to destination: URL,
+    fileManager: FileManager
+  ) throws {
+    guard fileManager.createFile(atPath: destination.path, contents: nil) else {
+      throw FileToolkitError.invalidOperation("cannot create staging file")
+    }
+    let input = try FileHandle(forReadingFrom: source)
+    defer { try? input.close() }
+    let output = try FileHandle(forWritingTo: destination)
+    defer { try? output.close() }
+
+    while let chunk = try input.read(upToCount: 64 * 1024), !chunk.isEmpty {
+      try output.write(contentsOf: chunk)
+    }
+    try output.synchronize()
+  }
+
   static func replaceStagingItem(
     _ staging: URL,
     destination: URL,

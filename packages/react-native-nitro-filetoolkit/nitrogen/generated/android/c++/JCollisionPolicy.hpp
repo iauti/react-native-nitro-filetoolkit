@@ -42,12 +42,12 @@ namespace margelo::nitro::filetoolkit {
     static jni::alias_ref<JCollisionPolicy> fromCpp(CollisionPolicy value) {
       static const auto clazz = javaClassStatic();
       switch (value) {
-        case CollisionPolicy::REPLACE:
-          static const auto fieldREPLACE = clazz->getStaticField<JCollisionPolicy>("REPLACE");
-          return clazz->getStaticFieldValue(fieldREPLACE);
         case CollisionPolicy::FAIL:
           static const auto fieldFAIL = clazz->getStaticField<JCollisionPolicy>("FAIL");
           return clazz->getStaticFieldValue(fieldFAIL);
+        case CollisionPolicy::REPLACE:
+          static const auto fieldREPLACE = clazz->getStaticField<JCollisionPolicy>("REPLACE");
+          return clazz->getStaticFieldValue(fieldREPLACE);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

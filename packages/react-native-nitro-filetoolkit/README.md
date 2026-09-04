@@ -7,6 +7,8 @@ Fast, type-safe native filesystem APIs for React Native, powered by
 
 - Swift and Kotlin filesystem operations outside the JS thread
 - Validated app-owned paths and absolute `file://` URIs
+- Read-only external sources, including Android `content://` URIs
+- Bounded, staged imports into app-owned storage
 - Bounded text reads and staged binary streaming
 - Explicit collision, missing-file, write, and atomicity policies
 - Paginated listing, metadata, hashing, disk-space, and cleanup APIs
@@ -68,6 +70,31 @@ const contents = await files.readText({
 const info = await files.stat(report)
 const digest = await files.hash({ source: report, algorithm: 'sha-256' })
 ```
+
+## Import a picker result
+
+Treat picker/share URIs as read-only capabilities, not writable filesystem
+locations. Android supports `content://` and `file://` sources; iOS supports
+`file://` sources:
+
+```ts
+const source = files.sourceFromUri(pickerUri)
+const sourceInfo = await files.inspectSource(source)
+if (sourceInfo === undefined) throw new Error('The selected file is unavailable')
+
+const imported = await files.importFile({
+  source,
+  destination: files.location('documents', 'imports/report.pdf'),
+  collision: 'replace',
+  atomicity: 'preferred',
+})
+
+console.log(imported.byteCount)
+```
+
+`sourceInfo.byteCount` may be `undefined` when a provider does not report a
+size. The returned local `FileInfo` describes the completed import. The toolkit
+does not persist or renew Android `content://` grants.
 
 ## Common operations
 
@@ -138,6 +165,8 @@ try {
 - `location()` rejects empty paths, absolute paths, backslashes, NUL bytes,
   empty segments, `.` segments, and `..` segments.
 - `fromUri()` currently accepts absolute `file://` URIs only.
+- `root()` returns a managed root; `FileLocation.origin` is `managed` or `uri`.
+- Use `sourceFromUri()` and `importFile()` for picker/share URIs.
 - Directory-list cursors are opaque. Pass `nextCursor` back unchanged.
 - `atomicity: 'required'` fails if the platform cannot guarantee the requested
   operation atomically; `'preferred'` may fall back where supported.
@@ -149,6 +178,7 @@ Full documentation and runnable examples:
 
 - [x] Filesystem locations, text and binary I/O, metadata, and mutations
 - [x] Hashing, disk-space reporting, and managed-directory cleanup
+- [x] Android content-source inspection and staged local imports
 - [ ] Durable downloads and uploads
 - [ ] Safe archive creation and extraction
 - [ ] Sharing, external opening, Photos, and MediaStore

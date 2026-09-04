@@ -1,9 +1,11 @@
 package com.margelo.nitro.filetoolkit
 
+import android.net.Uri
 import android.os.Build
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import android.system.StructStat
 import java.io.File
 import java.time.Instant
 
@@ -15,12 +17,22 @@ internal class FileMetadataMapper {
     false
   }
 
+  fun isDirectory(file: File): Boolean = try {
+    OsConstants.S_ISDIR(Os.lstat(file.path).st_mode)
+  } catch (_: ErrnoException) {
+    false
+  }
+
   fun info(file: File): FileInfo {
     val stat = try {
       Os.lstat(file.path)
     } catch (error: ErrnoException) {
       throw FileToolkitException.invalidOperation("location does not exist", error)
     }
+    return info(file, stat)
+  }
+
+  fun info(file: File, stat: StructStat): FileInfo {
     val kind = when {
       OsConstants.S_ISLNK(stat.st_mode) -> FileKind.SYMBOLIC_LINK
       OsConstants.S_ISDIR(stat.st_mode) -> FileKind.DIRECTORY
@@ -29,7 +41,7 @@ internal class FileMetadataMapper {
     val linkTarget = if (kind == FileKind.SYMBOLIC_LINK) {
       val rawTarget = Os.readlink(file.path)
       val target = if (rawTarget.startsWith('/')) File(rawTarget) else File(file.parentFile, rawTarget)
-      target.absoluteFile.toLocation()
+      uriLocation(target)
     } else {
       null
     }
@@ -40,12 +52,17 @@ internal class FileMetadataMapper {
     }
     return FileInfo(
       kind = kind,
-      location = file.absoluteFile.toLocation(),
+      location = uriLocation(file),
       name = file.name,
       byteCount = if (kind == FileKind.FILE) stat.st_size else null,
       symbolicLinkTarget = linkTarget,
       createdAt = null,
       modifiedAt = modifiedAt,
     )
+  }
+
+  private fun uriLocation(file: File): FileLocation {
+    val absolute = file.absoluteFile.normalize()
+    return FileLocation(FileLocationOrigin.URI, Uri.fromFile(absolute).toString())
   }
 }

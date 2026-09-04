@@ -11,6 +11,7 @@ import java.nio.charset.CodingErrorAction
 
 internal class HybridFileSystem : HybridFileSystemSpec() {
   private val resolver = FileLocationResolver()
+  private val sourceResolver = FileSourceResolver(locations = resolver)
   private val metadata = FileMetadataMapper()
 
   override fun location(directory: ManagedDirectory, relativePath: String): FileLocation =
@@ -18,14 +19,42 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
 
   override fun fromUri(uri: String): FileLocation = resolver.fromUri(uri)
 
+  override fun root(directory: ManagedDirectory): FileLocation = resolver.rootLocation(directory)
+
+  override fun sourceFromUri(uri: String): FileSource = sourceResolver.sourceFromUri(uri)
+
+  override fun inspectSource(source: FileSource): Promise<SourceInfo?> = Promise.parallel {
+    sourceResolver.inspect(source)
+  }
+
+  override fun importFile(options: ImportFileOptions): Promise<FileInfo> = Promise.parallel {
+    val destination = resolver.file(options.destination)
+    FileOperations.checkCollision(destination, options.collision, metadata)
+    FileOperations.ensureParent(destination, true)
+    val staging = FileOperations.siblingStagingFile(destination)
+    try {
+      sourceResolver.openInput(options.source).use { input ->
+        FileOperations.copyInputToFile(input, staging)
+      }
+      if (options.collision == CollisionPolicy.FAIL) {
+        FileOperations.installNew(staging, destination)
+      } else {
+        FileOperations.atomicReplace(staging, destination, options.atomicity)
+      }
+    } finally {
+      if (metadata.exists(staging)) FileOperations.delete(staging, recursive = true)
+    }
+    metadata.info(destination)
+  }
+
   override fun stat(location: FileLocation): Promise<FileInfo?> = Promise.parallel {
     val file = resolver.file(location)
     if (metadata.exists(file)) metadata.info(file) else null
   }
 
   override fun list(options: ListOptions): Promise<FilePage> = Promise.parallel {
-    val directory = resolver.file(options.directory)
-    if (!directory.isDirectory) {
+    val directory = resolver.fileForAccess(options.directory)
+    if (!metadata.isDirectory(directory)) {
       throw FileToolkitException.invalidOperation("location is not a directory")
     }
     val limit = checkedInt(options.maxEntryCount.toULong(), "maxEntryCount")
@@ -46,7 +75,7 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun readText(options: ReadTextOptions): Promise<String> = Promise.parallel {
-    val source = resolver.file(options.source)
+    val source = resolver.fileForAccess(options.source)
     val limit = checkedInt(options.maxByteCount.toULong(), "maxByteCount")
     source.inputStream().use { input ->
       val output = ByteArrayOutputStream(minOf(limit, DEFAULT_BUFFER_SIZE))
@@ -66,7 +95,14 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun writeText(options: WriteTextOptions): Promise<FileInfo> = Promise.parallel {
-    val destination = resolver.file(options.destination)
+    val destination = if (
+      options.mode == WriteMode.APPEND ||
+      options.mode == WriteMode.REPLACE && options.atomicity == Atomicity.NONE
+    ) {
+      resolver.fileForAccess(options.destination)
+    } else {
+      resolver.file(options.destination)
+    }
     val bytes = options.text.toByteArray(charset(options.encoding))
     FileOperations.ensureParent(destination, options.createParentDirectories)
     when (options.mode) {
@@ -105,11 +141,14 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun openReader(location: FileLocation): Promise<HybridFileReaderSpec> = Promise.parallel {
-    HybridFileReader(location, resolver.file(location))
+    HybridFileReader(location, resolver.fileForAccess(location))
   }
 
   override fun openWriter(options: OpenWriterOptions): Promise<HybridFileWriterSpec> = Promise.parallel {
     val destination = resolver.file(options.destination)
+    if (options.mode == WriteMode.APPEND && metadata.exists(destination)) {
+      resolver.fileForAccess(options.destination)
+    }
     FileOperations.ensureParent(destination, options.createParentDirectories)
     HybridFileWriter(
       options.destination,
@@ -121,7 +160,7 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun createDirectory(options: CreateDirectoryOptions): Promise<FileInfo> = Promise.parallel {
-    val directory = resolver.file(options.location)
+    val directory = resolver.fileForAccess(options.location)
     val created = if (options.createParentDirectories) directory.mkdirs() else directory.mkdir()
     if (!created && !directory.isDirectory) {
       throw FileToolkitException.invalidOperation("cannot create directory")
@@ -139,7 +178,9 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
     FileOperations.ensureParent(destination, true)
     val staging = FileOperations.siblingStagingFile(destination)
     try {
-      FileOperations.copy(source, staging, options.followSymbolicLinks)
+      FileOperations.copy(source, staging, options.followSymbolicLinks) { nestedSource ->
+        resolver.fileForAccess(nestedSource, options.source.origin)
+      }
       FileOperations.atomicReplace(staging, destination, options.atomicity)
     } finally {
       if (metadata.exists(staging)) FileOperations.delete(staging, true)
@@ -178,22 +219,19 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun hash(options: HashOptions): Promise<String> = Promise.parallel {
-    FileOperations.digest(resolver.file(options.source), options.algorithm)
+    FileOperations.digest(resolver.fileForAccess(options.source), options.algorithm)
   }
 
   override fun getDiskSpace(directory: ManagedDirectory): Promise<DiskSpace> = Promise.parallel {
-    val root = resolver.root(directory)
-    if (!root.exists() && !root.mkdirs()) {
-      throw FileToolkitException.invalidOperation("managed directory is unavailable")
-    }
+    val root = resolver.existingRootOrAncestor(directory)
     DiskSpace(root.usableSpace, root.totalSpace)
   }
 
   override fun clearManagedDirectory(
     options: ClearManagedDirectoryOptions,
   ): Promise<ClearResult> = Promise.parallel {
-    val root = resolver.root(options.directory)
-    if (!root.exists()) return@parallel ClearResult(0L, 0L)
+    val root = resolver.safeRoot(options.directory)
+    if (!metadata.exists(root)) return@parallel ClearResult(0L, 0L)
     var removed = 0L
     var reclaimed = 0L
     root.listFiles().orEmpty().forEach { entry ->
@@ -209,7 +247,7 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   private fun recursiveChildren(directory: File): List<File> = buildList {
     visibleChildren(directory).forEach { child ->
       add(child)
-      if (child.isDirectory) addAll(recursiveChildren(child))
+      if (metadata.isDirectory(child)) addAll(recursiveChildren(child))
     }
   }
 

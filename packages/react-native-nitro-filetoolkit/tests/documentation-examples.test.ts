@@ -50,3 +50,21 @@ export async function documentedStreamingWorkflow(): Promise<void> {
     writer.close()
   }
 }
+
+export async function documentedImportWorkflow(uri: string) {
+  const files = FileToolkit.getFileSystem()
+  const source = files.sourceFromUri(uri)
+  const sourceInfo = await files.inspectSource(source)
+  if (sourceInfo === undefined) throw new Error('The selected file is unavailable')
+
+  if (sourceInfo.byteCount === undefined) {
+    // Import first, then use the returned local FileInfo.byteCount.
+  }
+
+  return files.importFile({
+    source,
+    destination: files.location('documents', 'imports/report.bin'),
+    collision: 'replace',
+    atomicity: 'preferred',
+  })
+}

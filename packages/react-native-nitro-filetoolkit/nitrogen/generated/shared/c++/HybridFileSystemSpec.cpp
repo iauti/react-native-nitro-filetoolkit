@@ -16,6 +16,10 @@ namespace margelo::nitro::filetoolkit {
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("location", &HybridFileSystemSpec::location);
       prototype.registerHybridMethod("fromUri", &HybridFileSystemSpec::fromUri);
+      prototype.registerHybridMethod("root", &HybridFileSystemSpec::root);
+      prototype.registerHybridMethod("sourceFromUri", &HybridFileSystemSpec::sourceFromUri);
+      prototype.registerHybridMethod("inspectSource", &HybridFileSystemSpec::inspectSource);
+      prototype.registerHybridMethod("importFile", &HybridFileSystemSpec::importFile);
       prototype.registerHybridMethod("stat", &HybridFileSystemSpec::stat);
       prototype.registerHybridMethod("list", &HybridFileSystemSpec::list);
       prototype.registerHybridMethod("readText", &HybridFileSystemSpec::readText);

@@ -28,8 +28,10 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `FileLocationOrigin` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileLocationOrigin; }
 
-
+#include "FileLocationOrigin.hpp"
 #include <string>
 
 namespace margelo::nitro::filetoolkit {
@@ -39,11 +41,12 @@ namespace margelo::nitro::filetoolkit {
    */
   struct FileLocation final {
   public:
+    FileLocationOrigin origin     SWIFT_PRIVATE;
     std::string uri     SWIFT_PRIVATE;
 
   public:
     FileLocation() = default;
-    explicit FileLocation(std::string uri): uri(uri) {}
+    explicit FileLocation(FileLocationOrigin origin, std::string uri): origin(origin), uri(uri) {}
 
   public:
     friend bool operator==(const FileLocation& lhs, const FileLocation& rhs) = default;
@@ -59,11 +62,13 @@ namespace margelo::nitro {
     static inline margelo::nitro::filetoolkit::FileLocation fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::filetoolkit::FileLocation(
+        JSIConverter<margelo::nitro::filetoolkit::FileLocationOrigin>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin"))),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uri")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::filetoolkit::FileLocation& arg) {
       jsi::Object obj(runtime);
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "origin"), JSIConverter<margelo::nitro::filetoolkit::FileLocationOrigin>::toJSI(runtime, arg.origin));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "uri"), JSIConverter<std::string>::toJSI(runtime, arg.uri));
       return obj;
     }
@@ -75,6 +80,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
+      if (!JSIConverter<margelo::nitro::filetoolkit::FileLocationOrigin>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "origin")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "uri")))) return false;
       return true;
     }

@@ -18,10 +18,16 @@ namespace margelo::nitro::filetoolkit { struct DiskSpace; }
 namespace margelo::nitro::filetoolkit { struct FileInfo; }
 // Forward declaration of `FileKind` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class FileKind; }
+// Forward declaration of `FileLocationOrigin` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileLocationOrigin; }
 // Forward declaration of `FileLocation` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
 // Forward declaration of `FilePage` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FilePage; }
+// Forward declaration of `FileSourceScheme` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileSourceScheme; }
+// Forward declaration of `FileSource` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct FileSource; }
 // Forward declaration of `HybridFileReaderSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileReaderSpec; }
 // Forward declaration of `HybridFileSystemSpec` to properly resolve imports.
@@ -32,6 +38,8 @@ namespace margelo::nitro::filetoolkit { class HybridFileToolkitFactorySpec; }
 namespace margelo::nitro::filetoolkit { class HybridFileWriterSpec; }
 // Forward declaration of `ReadChunk` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct ReadChunk; }
+// Forward declaration of `SourceInfo` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct SourceInfo; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridFileReaderSpec_cxx` to properly resolve imports.
@@ -49,12 +57,16 @@ namespace NitroFileToolkit { class HybridFileWriterSpec_cxx; }
 #include "FileInfo.hpp"
 #include "FileKind.hpp"
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "FilePage.hpp"
+#include "FileSource.hpp"
+#include "FileSourceScheme.hpp"
 #include "HybridFileReaderSpec.hpp"
 #include "HybridFileSystemSpec.hpp"
 #include "HybridFileToolkitFactorySpec.hpp"
 #include "HybridFileWriterSpec.hpp"
 #include "ReadChunk.hpp"
+#include "SourceInfo.hpp"
 #include <NitroModules/ArrayBuffer.hpp>
 #include <NitroModules/ArrayBufferHolder.hpp>
 #include <NitroModules/Promise.hpp>
@@ -203,6 +215,21 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
     return Result<void>::withError(error);
   }
   
+  // pragma MARK: std::optional<std::string>
+  /**
+   * Specialized version of `std::optional<std::string>`.
+   */
+  using std__optional_std__string_ = std::optional<std::string>;
+  inline std::optional<std::string> create_std__optional_std__string_(const std::string& value) noexcept {
+    return std::optional<std::string>(value);
+  }
+  inline bool has_value_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
+    return optional.value();
+  }
+  
   // pragma MARK: std::optional<uint64_t>
   /**
    * Specialized version of `std::optional<uint64_t>`.
@@ -216,6 +243,55 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
   }
   inline uint64_t get_std__optional_uint64_t_(const std::optional<uint64_t>& optional) noexcept {
     return optional.value();
+  }
+  
+  // pragma MARK: std::optional<SourceInfo>
+  /**
+   * Specialized version of `std::optional<SourceInfo>`.
+   */
+  using std__optional_SourceInfo_ = std::optional<SourceInfo>;
+  inline std::optional<SourceInfo> create_std__optional_SourceInfo_(const SourceInfo& value) noexcept {
+    return std::optional<SourceInfo>(value);
+  }
+  inline bool has_value_std__optional_SourceInfo_(const std::optional<SourceInfo>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline SourceInfo get_std__optional_SourceInfo_(const std::optional<SourceInfo>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::optional<SourceInfo>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::optional<SourceInfo>>>`.
+   */
+  using std__shared_ptr_Promise_std__optional_SourceInfo___ = std::shared_ptr<Promise<std::optional<SourceInfo>>>;
+  inline std::shared_ptr<Promise<std::optional<SourceInfo>>> create_std__shared_ptr_Promise_std__optional_SourceInfo___() noexcept {
+    return Promise<std::optional<SourceInfo>>::create();
+  }
+  inline PromiseHolder<std::optional<SourceInfo>> wrap_std__shared_ptr_Promise_std__optional_SourceInfo___(std::shared_ptr<Promise<std::optional<SourceInfo>>> promise) noexcept {
+    return PromiseHolder<std::optional<SourceInfo>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::optional<SourceInfo>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::optional<SourceInfo>&)>`.
+   */
+  using Func_void_std__optional_SourceInfo_ = std::function<void(const std::optional<SourceInfo>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::optional<SourceInfo>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__optional_SourceInfo__Wrapper final {
+  public:
+    explicit Func_void_std__optional_SourceInfo__Wrapper(std::function<void(const std::optional<SourceInfo>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::optional<SourceInfo>& /* result */)>>(std::move(func))) {}
+    inline void call(std::optional<SourceInfo> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::optional<SourceInfo>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__optional_SourceInfo_ create_Func_void_std__optional_SourceInfo_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__optional_SourceInfo__Wrapper wrap_Func_void_std__optional_SourceInfo_(Func_void_std__optional_SourceInfo_ value) noexcept {
+    return Func_void_std__optional_SourceInfo__Wrapper(std::move(value));
   }
   
   // pragma MARK: std::optional<FileLocation>
@@ -246,6 +322,40 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
   }
   inline std::chrono::system_clock::time_point get_std__optional_std__chrono__system_clock__time_point_(const std::optional<std::chrono::system_clock::time_point>& optional) noexcept {
     return optional.value();
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<FileInfo>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<FileInfo>>`.
+   */
+  using std__shared_ptr_Promise_FileInfo__ = std::shared_ptr<Promise<FileInfo>>;
+  inline std::shared_ptr<Promise<FileInfo>> create_std__shared_ptr_Promise_FileInfo__() noexcept {
+    return Promise<FileInfo>::create();
+  }
+  inline PromiseHolder<FileInfo> wrap_std__shared_ptr_Promise_FileInfo__(std::shared_ptr<Promise<FileInfo>> promise) noexcept {
+    return PromiseHolder<FileInfo>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const FileInfo& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const FileInfo&)>`.
+   */
+  using Func_void_FileInfo = std::function<void(const FileInfo& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const FileInfo& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_FileInfo_Wrapper final {
+  public:
+    explicit Func_void_FileInfo_Wrapper(std::function<void(const FileInfo& /* result */)>&& func): _function(std::make_unique<std::function<void(const FileInfo& /* result */)>>(std::move(func))) {}
+    inline void call(FileInfo result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const FileInfo& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_FileInfo create_Func_void_FileInfo(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_FileInfo_Wrapper wrap_Func_void_FileInfo(Func_void_FileInfo value) noexcept {
+    return Func_void_FileInfo_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::optional<FileInfo>
@@ -306,21 +416,6 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
     std::vector<FileInfo> vector;
     vector.reserve(size);
     return vector;
-  }
-  
-  // pragma MARK: std::optional<std::string>
-  /**
-   * Specialized version of `std::optional<std::string>`.
-   */
-  using std__optional_std__string_ = std::optional<std::string>;
-  inline std::optional<std::string> create_std__optional_std__string_(const std::string& value) noexcept {
-    return std::optional<std::string>(value);
-  }
-  inline bool has_value_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
-    return optional.value();
   }
   
   // pragma MARK: std::shared_ptr<Promise<FilePage>>
@@ -389,40 +484,6 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
   Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
     return Func_void_std__string_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<FileInfo>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<FileInfo>>`.
-   */
-  using std__shared_ptr_Promise_FileInfo__ = std::shared_ptr<Promise<FileInfo>>;
-  inline std::shared_ptr<Promise<FileInfo>> create_std__shared_ptr_Promise_FileInfo__() noexcept {
-    return Promise<FileInfo>::create();
-  }
-  inline PromiseHolder<FileInfo> wrap_std__shared_ptr_Promise_FileInfo__(std::shared_ptr<Promise<FileInfo>> promise) noexcept {
-    return PromiseHolder<FileInfo>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const FileInfo& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const FileInfo&)>`.
-   */
-  using Func_void_FileInfo = std::function<void(const FileInfo& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const FileInfo& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_FileInfo_Wrapper final {
-  public:
-    explicit Func_void_FileInfo_Wrapper(std::function<void(const FileInfo& /* result */)>&& func): _function(std::make_unique<std::function<void(const FileInfo& /* result */)>>(std::move(func))) {}
-    inline void call(FileInfo result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const FileInfo& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_FileInfo create_Func_void_FileInfo(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_FileInfo_Wrapper wrap_Func_void_FileInfo(Func_void_FileInfo value) noexcept {
-    return Func_void_FileInfo_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::shared_ptr<Promise<std::shared_ptr<HybridFileReaderSpec>>>
@@ -594,6 +655,33 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
     return Result<FileLocation>::withError(error);
   }
   
+  // pragma MARK: Result<FileSource>
+  using Result_FileSource_ = Result<FileSource>;
+  inline Result_FileSource_ create_Result_FileSource_(const FileSource& value) noexcept {
+    return Result<FileSource>::withValue(value);
+  }
+  inline Result_FileSource_ create_Result_FileSource_(const std::exception_ptr& error) noexcept {
+    return Result<FileSource>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::optional<SourceInfo>>>>
+  using Result_std__shared_ptr_Promise_std__optional_SourceInfo____ = Result<std::shared_ptr<Promise<std::optional<SourceInfo>>>>;
+  inline Result_std__shared_ptr_Promise_std__optional_SourceInfo____ create_Result_std__shared_ptr_Promise_std__optional_SourceInfo____(const std::shared_ptr<Promise<std::optional<SourceInfo>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::optional<SourceInfo>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__optional_SourceInfo____ create_Result_std__shared_ptr_Promise_std__optional_SourceInfo____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::optional<SourceInfo>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<FileInfo>>>
+  using Result_std__shared_ptr_Promise_FileInfo___ = Result<std::shared_ptr<Promise<FileInfo>>>;
+  inline Result_std__shared_ptr_Promise_FileInfo___ create_Result_std__shared_ptr_Promise_FileInfo___(const std::shared_ptr<Promise<FileInfo>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<FileInfo>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_FileInfo___ create_Result_std__shared_ptr_Promise_FileInfo___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<FileInfo>>>::withError(error);
+  }
+  
   // pragma MARK: Result<std::shared_ptr<Promise<std::optional<FileInfo>>>>
   using Result_std__shared_ptr_Promise_std__optional_FileInfo____ = Result<std::shared_ptr<Promise<std::optional<FileInfo>>>>;
   inline Result_std__shared_ptr_Promise_std__optional_FileInfo____ create_Result_std__shared_ptr_Promise_std__optional_FileInfo____(const std::shared_ptr<Promise<std::optional<FileInfo>>>& value) noexcept {
@@ -619,15 +707,6 @@ namespace margelo::nitro::filetoolkit::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_std__string___ create_Result_std__shared_ptr_Promise_std__string___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<std::string>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<FileInfo>>>
-  using Result_std__shared_ptr_Promise_FileInfo___ = Result<std::shared_ptr<Promise<FileInfo>>>;
-  inline Result_std__shared_ptr_Promise_FileInfo___ create_Result_std__shared_ptr_Promise_FileInfo___(const std::shared_ptr<Promise<FileInfo>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<FileInfo>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_FileInfo___ create_Result_std__shared_ptr_Promise_FileInfo___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<FileInfo>>>::withError(error);
   }
   
   // pragma MARK: Result<std::shared_ptr<Promise<std::shared_ptr<HybridFileReaderSpec>>>>

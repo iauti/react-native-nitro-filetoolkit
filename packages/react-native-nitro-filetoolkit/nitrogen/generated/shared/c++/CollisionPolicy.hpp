@@ -29,8 +29,8 @@ namespace margelo::nitro::filetoolkit {
    * An enum which can be represented as a JavaScript union (CollisionPolicy).
    */
   enum class CollisionPolicy {
-    REPLACE      SWIFT_NAME(replace) = 0,
-    FAIL      SWIFT_NAME(fail) = 1,
+    FAIL      SWIFT_NAME(fail) = 0,
+    REPLACE      SWIFT_NAME(replace) = 1,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::filetoolkit
@@ -43,16 +43,16 @@ namespace margelo::nitro {
     static inline margelo::nitro::filetoolkit::CollisionPolicy fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("replace"): return margelo::nitro::filetoolkit::CollisionPolicy::REPLACE;
         case hashString("fail"): return margelo::nitro::filetoolkit::CollisionPolicy::FAIL;
+        case hashString("replace"): return margelo::nitro::filetoolkit::CollisionPolicy::REPLACE;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum CollisionPolicy - invalid value!");
       }
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::filetoolkit::CollisionPolicy arg) {
       switch (arg) {
-        case margelo::nitro::filetoolkit::CollisionPolicy::REPLACE: return JSIConverter<std::string>::toJSI(runtime, "replace");
         case margelo::nitro::filetoolkit::CollisionPolicy::FAIL: return JSIConverter<std::string>::toJSI(runtime, "fail");
+        case margelo::nitro::filetoolkit::CollisionPolicy::REPLACE: return JSIConverter<std::string>::toJSI(runtime, "replace");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert CollisionPolicy to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -64,8 +64,8 @@ namespace margelo::nitro {
       }
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, value);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("replace"):
         case hashString("fail"):
+        case hashString("replace"):
           return true;
         default:
           return false;

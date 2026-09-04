@@ -11,7 +11,9 @@
 #include "ReadTextOptions.hpp"
 
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "JFileLocation.hpp"
+#include "JFileLocationOrigin.hpp"
 #include "JTextEncoding.hpp"
 #include "TextEncoding.hpp"
 #include <string>

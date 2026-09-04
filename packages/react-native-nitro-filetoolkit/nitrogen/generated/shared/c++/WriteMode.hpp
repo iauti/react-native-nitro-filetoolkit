@@ -29,8 +29,8 @@ namespace margelo::nitro::filetoolkit {
    * An enum which can be represented as a JavaScript union (WriteMode).
    */
   enum class WriteMode {
-    CREATE_NEW      SWIFT_NAME(createNew) = 0,
-    REPLACE      SWIFT_NAME(replace) = 1,
+    REPLACE      SWIFT_NAME(replace) = 0,
+    CREATE_NEW      SWIFT_NAME(createNew) = 1,
     APPEND      SWIFT_NAME(append) = 2,
   } CLOSED_ENUM;
 
@@ -44,8 +44,8 @@ namespace margelo::nitro {
     static inline margelo::nitro::filetoolkit::WriteMode fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("create-new"): return margelo::nitro::filetoolkit::WriteMode::CREATE_NEW;
         case hashString("replace"): return margelo::nitro::filetoolkit::WriteMode::REPLACE;
+        case hashString("create-new"): return margelo::nitro::filetoolkit::WriteMode::CREATE_NEW;
         case hashString("append"): return margelo::nitro::filetoolkit::WriteMode::APPEND;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum WriteMode - invalid value!");
@@ -53,8 +53,8 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::filetoolkit::WriteMode arg) {
       switch (arg) {
-        case margelo::nitro::filetoolkit::WriteMode::CREATE_NEW: return JSIConverter<std::string>::toJSI(runtime, "create-new");
         case margelo::nitro::filetoolkit::WriteMode::REPLACE: return JSIConverter<std::string>::toJSI(runtime, "replace");
+        case margelo::nitro::filetoolkit::WriteMode::CREATE_NEW: return JSIConverter<std::string>::toJSI(runtime, "create-new");
         case margelo::nitro::filetoolkit::WriteMode::APPEND: return JSIConverter<std::string>::toJSI(runtime, "append");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert WriteMode to JS - invalid value: "
@@ -67,8 +67,8 @@ namespace margelo::nitro {
       }
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, value);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
-        case hashString("create-new"):
         case hashString("replace"):
+        case hashString("create-new"):
         case hashString("append"):
           return true;
         default:

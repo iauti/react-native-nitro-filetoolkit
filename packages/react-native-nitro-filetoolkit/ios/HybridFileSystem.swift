@@ -9,12 +9,14 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   private let fileManager: FileManager
   private let resolver: FileLocationResolver
+  private let sourceResolver: FileSourceResolver
   private let metadata: FileMetadataMapper
 
   override init() {
     let fileManager = FileManager.default
     self.fileManager = fileManager
     resolver = FileLocationResolver(fileManager: fileManager)
+    sourceResolver = FileSourceResolver(fileManager: fileManager, locations: resolver)
     metadata = FileMetadataMapper(fileManager: fileManager)
     super.init()
   }
@@ -27,17 +29,66 @@ final class HybridFileSystem: HybridFileSystemSpec {
     try resolver.fromUri(uri)
   }
 
+  func root(directory: ManagedDirectory) throws -> FileLocation {
+    try resolver.root(directory)
+  }
+
+  func sourceFromUri(uri: String) throws -> FileSource {
+    try sourceResolver.sourceFromUri(uri)
+  }
+
+  func inspectSource(source: FileSource) throws -> Promise<SourceInfo?> {
+    Promise.parallel(Self.ioQueue) { [sourceResolver] in
+      try sourceResolver.inspect(source)
+    }
+  }
+
+  func importFile(options: ImportFileOptions) throws -> Promise<FileInfo> {
+    Promise.parallel(Self.ioQueue) { [resolver, sourceResolver, metadata, fileManager] in
+      let source = try sourceResolver.url(from: options.source)
+      let destination = try resolver.url(from: options.destination)
+      try FileOperations.checkCollision(
+        at: destination,
+        policy: options.collision,
+        fileManager: fileManager
+      )
+      try FileOperations.prepareParent(of: destination, create: true, fileManager: fileManager)
+      let staging = FileOperations.siblingStagingURL(for: destination)
+      defer { try? fileManager.removeItem(at: staging) }
+
+      try FileOperations.copyFile(from: source, to: staging, fileManager: fileManager)
+      if options.collision == .fail {
+        try FileOperations.installNewStagingItem(
+          staging,
+          destination: destination,
+          fileManager: fileManager
+        )
+      } else {
+        try FileOperations.replaceStagingItem(
+          staging,
+          destination: destination,
+          atomicity: options.atomicity,
+          fileManager: fileManager
+        )
+      }
+      return try metadata.info(for: destination)
+    }
+  }
+
   func stat(location: FileLocation) throws -> Promise<FileInfo?> {
-    Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
+    Promise.parallel(Self.ioQueue) { [resolver, metadata] in
       let url = try resolver.url(from: location)
-      guard fileManager.fileExists(atPath: url.path) else { return nil }
+      guard metadata.exists(at: url) else { return nil }
       return try metadata.info(for: url)
     }
   }
 
   func list(options: ListOptions) throws -> Promise<FilePage> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let directory = try resolver.url(from: options.directory)
+      let directory = try resolver.urlForAccess(from: options.directory)
+      guard metadata.isDirectory(at: directory) else {
+        throw FileToolkitError.invalidOperation("location is not a directory")
+      }
       let limit = try Self.checkedInt(options.maxEntryCount, name: "maxEntryCount")
       guard limit > 0 else {
         throw FileToolkitError.invalidOperation("maxEntryCount must be greater than zero")
@@ -75,7 +126,7 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func readText(options: ReadTextOptions) throws -> Promise<String> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      let url = try resolver.url(from: options.source)
+      let url = try resolver.urlForAccess(from: options.source)
       let limit = try Self.checkedInt(options.maxByteCount, name: "maxByteCount")
       let handle = try FileHandle(forReadingFrom: url)
       defer { try? handle.close() }
@@ -92,7 +143,12 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func writeText(options: WriteTextOptions) throws -> Promise<FileInfo> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let destination = try resolver.url(from: options.destination)
+      let destination = if options.mode == .append ||
+        (options.mode == .replace && options.atomicity == .none) {
+        try resolver.urlForAccess(from: options.destination)
+      } else {
+        try resolver.url(from: options.destination)
+      }
       guard let data = options.text.data(using: Self.stringEncoding(options.encoding)) else {
         throw FileToolkitError.invalidOperation("text cannot be encoded as \(options.encoding.stringValue)")
       }
@@ -114,7 +170,7 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func openReader(location: FileLocation) throws -> Promise<any HybridFileReaderSpec> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      let url = try resolver.url(from: location)
+      let url = try resolver.urlForAccess(from: location)
       return try HybridFileReader(location: location, url: url)
     }
   }
@@ -122,6 +178,9 @@ final class HybridFileSystem: HybridFileSystemSpec {
   func openWriter(options: OpenWriterOptions) throws -> Promise<any HybridFileWriterSpec> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
       let destination = try resolver.url(from: options.destination)
+      if options.mode == .append, metadata.exists(at: destination) {
+        _ = try resolver.urlForAccess(from: options.destination)
+      }
       try FileOperations.prepareParent(
         of: destination,
         create: options.createParentDirectories,
@@ -140,7 +199,7 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func createDirectory(options: CreateDirectoryOptions) throws -> Promise<FileInfo> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let url = try resolver.url(from: options.location)
+      let url = try resolver.urlForAccess(from: options.location)
       try fileManager.createDirectory(
         at: url,
         withIntermediateDirectories: options.createParentDirectories
@@ -151,7 +210,11 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func copy(options: CopyOptions) throws -> Promise<FileInfo> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      var source = try resolver.url(from: options.source)
+      var source = if options.followSymbolicLinks {
+        try resolver.urlForAccess(from: options.source)
+      } else {
+        try resolver.url(from: options.source)
+      }
       let destination = try resolver.url(from: options.destination)
       if options.followSymbolicLinks {
         source = source.resolvingSymlinksInPath()
@@ -200,14 +263,13 @@ final class HybridFileSystem: HybridFileSystemSpec {
   }
 
   func remove(options: RemoveOptions) throws -> Promise<Void> {
-    Promise.parallel(Self.ioQueue) { [resolver, fileManager] in
+    Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
       let url = try resolver.url(from: options.location)
-      var isDirectory: ObjCBool = false
-      guard fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) else {
+      guard metadata.exists(at: url) else {
         if options.missing == .ignore { return }
         throw FileToolkitError.invalidOperation("location does not exist")
       }
-      if isDirectory.boolValue && !options.recursive {
+      if metadata.isDirectory(at: url) && !options.recursive {
         let entries = try fileManager.contentsOfDirectory(atPath: url.path)
         guard entries.isEmpty else {
           throw FileToolkitError.invalidOperation("directory is not empty; set recursive to true")
@@ -219,13 +281,16 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func hash(options: HashOptions) throws -> Promise<String> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      try FileHasher.hash(url: resolver.url(from: options.source), algorithm: options.algorithm)
+      try FileHasher.hash(
+        url: resolver.urlForAccess(from: options.source),
+        algorithm: options.algorithm
+      )
     }
   }
 
   func getDiskSpace(directory: ManagedDirectory) throws -> Promise<DiskSpace> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      let root = try resolver.rootURL(for: directory)
+      let root = try resolver.existingRootOrAncestor(for: directory)
       let values = try root.resourceValues(forKeys: [
         .volumeAvailableCapacityForImportantUsageKey,
         .volumeTotalCapacityKey,
@@ -237,9 +302,9 @@ final class HybridFileSystem: HybridFileSystemSpec {
   }
 
   func clearManagedDirectory(options: ClearManagedDirectoryOptions) throws -> Promise<ClearResult> {
-    Promise.parallel(Self.ioQueue) { [resolver, fileManager] in
-      let root = try resolver.rootURL(for: options.directory)
-      guard fileManager.fileExists(atPath: root.path) else {
+    Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
+      let root = try resolver.safeRootURL(for: options.directory)
+      guard metadata.exists(at: root) else {
         return ClearResult(removedEntryCount: 0, reclaimedByteCount: 0)
       }
       let entries = try fileManager.contentsOfDirectory(at: root, includingPropertiesForKeys: nil)
@@ -351,7 +416,8 @@ final class HybridFileSystem: HybridFileSystemSpec {
     var count: UInt64 = 1
     let attributes = try? fileManager.attributesOfItem(atPath: url.path)
     var bytes = (attributes?[.size] as? NSNumber)?.uint64Value ?? 0
-    if let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: nil) {
+    if attributes?[.type] as? FileAttributeType == .typeDirectory,
+       let enumerator = fileManager.enumerator(at: url, includingPropertiesForKeys: nil) {
       for case let child as URL in enumerator {
         count += 1
         let childAttributes = try? fileManager.attributesOfItem(atPath: child.path)

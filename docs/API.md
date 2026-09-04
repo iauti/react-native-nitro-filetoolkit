@@ -15,6 +15,15 @@ All byte counts and offsets are Nitro `UInt64` values and therefore TypeScript
 
 ## Locations
 
+`FileLocation` identifies a writable local filesystem path and contains
+`origin: 'managed' | 'uri'` plus a canonical `file://` URI. Construct locations
+with the methods below instead of hand-authoring them.
+
+### `root(directory)`
+
+Returns the canonical app-owned root for `cache`, `documents`, `downloads`,
+`temporary`, or `application-support`.
+
 ### `location(directory, relativePath)`
 
 Creates a validated `FileLocation` below an app-owned root.
@@ -32,8 +41,59 @@ contain NUL bytes, backslashes, empty segments, `.` segments, or `..` segments.
 
 ### `fromUri(uri)`
 
-Validates and normalizes an absolute `file://` URI. Android `content://` URIs
-are not supported in the filesystem-only release.
+Validates and normalizes an absolute `file://` URI into a URI-origin location.
+It never accepts Android `content://` values.
+
+## External sources
+
+`FileSource` is a read-only capability with `scheme: 'file' | 'content'` and a
+validated URI. It is intentionally incompatible with `FileLocation`, so it
+cannot be passed to write, move, or remove APIs.
+
+### `sourceFromUri(uri)`
+
+Validates a picker/share URI. Android accepts absolute `file://` and
+`content://` URIs. iOS accepts absolute `file://` URIs only.
+
+### `inspectSource(source)`
+
+Returns `SourceInfo | undefined`. `undefined` means the source is unavailable;
+permission and provider failures reject. `name` and `byteCount` are optional
+because content providers are not required to report them.
+
+```ts
+const info = await files.inspectSource(source)
+if (info === undefined) throw new Error('The selected file is unavailable')
+
+if (info.byteCount === undefined) {
+  // Import first, then use the returned local FileInfo.byteCount.
+}
+```
+
+### `importFile(options)`
+
+Streams a `FileSource` into a local destination through a sibling staging file
+and returns the destination `FileInfo` after installation.
+
+```ts
+await files.importFile({
+  source,
+  destination: files.location('documents', 'imports/selected-file'),
+  collision: 'fail',
+  atomicity: 'preferred',
+})
+```
+
+`collision` is `fail` or `replace`. With `fail`, rejection preserves an existing
+destination through a race-safe install-new primitive. With `replace`, use
+`atomicity: 'required'` when the old destination must survive any failed
+installation; `preferred` and `none` may use a non-atomic fallback. `atomicity`
+also accepts `preferred` or `none`. Imports are bounded and do not load the
+entire source into JavaScript or native memory.
+
+Android `content://` access uses the grant currently held by the app. The
+toolkit does not persist or renew grants; inspect and import while access is
+valid.
 
 ## Metadata and listing
 

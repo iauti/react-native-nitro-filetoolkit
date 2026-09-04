@@ -149,6 +149,74 @@ open class HybridFileSystemSpec_cxx {
   }
   
   @inline(__always)
+  public final func root(directory: Int32) -> bridge.Result_FileLocation_ {
+    do {
+      let __result = try self.__implementation.root(directory: margelo.nitro.filetoolkit.ManagedDirectory(rawValue: directory)!)
+      let __resultCpp = __result
+      return bridge.create_Result_FileLocation_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_FileLocation_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func sourceFromUri(uri: std.string) -> bridge.Result_FileSource_ {
+    do {
+      let __result = try self.__implementation.sourceFromUri(uri: String(uri))
+      let __resultCpp = __result
+      return bridge.create_Result_FileSource_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_FileSource_(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func inspectSource(source: FileSource) -> bridge.Result_std__shared_ptr_Promise_std__optional_SourceInfo____ {
+    do {
+      let __result = try self.__implementation.inspectSource(source: source)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__optional_SourceInfo___ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__optional_SourceInfo___()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__optional_SourceInfo___(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__optional_SourceInfo_ in
+              if let __unwrappedValue = __result {
+                return bridge.create_std__optional_SourceInfo_(__unwrappedValue)
+              } else {
+                return .init()
+              }
+            }()) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__optional_SourceInfo____(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_std__optional_SourceInfo____(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func importFile(options: ImportFileOptions) -> bridge.Result_std__shared_ptr_Promise_FileInfo___ {
+    do {
+      let __result = try self.__implementation.importFile(options: options)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_FileInfo__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_FileInfo__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_FileInfo__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_FileInfo___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_FileInfo___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func stat(location: FileLocation) -> bridge.Result_std__shared_ptr_Promise_std__optional_FileInfo____ {
     do {
       let __result = try self.__implementation.stat(location: location)

@@ -13,9 +13,11 @@
 #include "Atomicity.hpp"
 #include "CollisionPolicy.hpp"
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "JAtomicity.hpp"
 #include "JCollisionPolicy.hpp"
 #include "JFileLocation.hpp"
+#include "JFileLocationOrigin.hpp"
 #include <string>
 
 namespace margelo::nitro::filetoolkit {

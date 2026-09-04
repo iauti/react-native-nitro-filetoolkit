@@ -16,8 +16,8 @@ import com.facebook.proguard.annotations.DoNotStrip
 @DoNotStrip
 @Keep
 enum class WriteMode(@DoNotStrip @Keep val value: Int) {
-  CREATE_NEW(0),
-  REPLACE(1),
+  REPLACE(0),
+  CREATE_NEW(1),
   APPEND(2);
 
   companion object

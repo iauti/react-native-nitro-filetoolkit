@@ -8,15 +8,18 @@ import type {
   DiskSpace,
   FilePage,
   HashOptions,
+  ImportFileOptions,
   ListOptions,
   MoveOptions,
   OpenWriterOptions,
   ReadTextOptions,
   RemoveOptions,
+  SourceInfo,
   WriteTextOptions,
 } from '../types/FileOptions'
 import type {
   FileLocation,
+  FileSource,
   ManagedDirectory,
 } from '../types/FileLocation'
 import type { FileReader } from './FileReader.nitro'
@@ -29,6 +32,10 @@ export interface FileSystem
     relativePath: string,
   ): FileLocation
   fromUri(uri: string): FileLocation
+  root(directory: ManagedDirectory): FileLocation
+  sourceFromUri(uri: string): FileSource
+  inspectSource(source: FileSource): Promise<SourceInfo | undefined>
+  importFile(options: ImportFileOptions): Promise<FileInfo>
 
   stat(location: FileLocation): Promise<FileInfo | undefined>
   list(options: ListOptions): Promise<FilePage>

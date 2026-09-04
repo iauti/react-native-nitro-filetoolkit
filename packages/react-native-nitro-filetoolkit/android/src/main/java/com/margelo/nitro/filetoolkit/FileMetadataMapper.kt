@@ -5,6 +5,7 @@ import android.os.Build
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
+import android.system.StructStat
 import java.io.File
 import java.time.Instant
 
@@ -28,6 +29,10 @@ internal class FileMetadataMapper {
     } catch (error: ErrnoException) {
       throw FileToolkitException.invalidOperation("location does not exist", error)
     }
+    return info(file, stat)
+  }
+
+  fun info(file: File, stat: StructStat): FileInfo {
     val kind = when {
       OsConstants.S_ISLNK(stat.st_mode) -> FileKind.SYMBOLIC_LINK
       OsConstants.S_ISDIR(stat.st_mode) -> FileKind.DIRECTORY

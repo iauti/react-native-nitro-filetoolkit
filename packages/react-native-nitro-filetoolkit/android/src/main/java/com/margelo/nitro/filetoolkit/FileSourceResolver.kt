@@ -73,16 +73,17 @@ internal class FileSourceResolver(
 
   private fun inspectFile(source: FileSource): SourceInfo? {
     val file = locations.fromUri(source.uri).let(locations::file)
-    try {
-      Os.lstat(file.path)
+    return try {
+      val stat = Os.lstat(file.path)
+      val info = metadata.info(file, stat)
+      SourceInfo(source = source, name = info.name, byteCount = info.byteCount?.toULong())
     } catch (error: ErrnoException) {
       if (error.errno == OsConstants.ENOENT || error.errno == OsConstants.ENOTDIR) {
-        return null
+        null
+      } else {
+        throw FileToolkitException.invalidOperation("source metadata cannot be read", error)
       }
-      throw FileToolkitException.invalidOperation("source metadata cannot be read", error)
     }
-    val info = metadata.info(file)
-    return SourceInfo(source = source, name = info.name, byteCount = info.byteCount?.toULong())
   }
 
   private fun inspectContent(source: FileSource): SourceInfo? = try {

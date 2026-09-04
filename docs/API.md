@@ -84,11 +84,12 @@ await files.importFile({
 })
 ```
 
-`collision` is `fail` or `replace`. Failure never overwrites an existing
-destination. `atomicity` is `required`, `preferred`, or `none`; `required`
-rejects when the platform cannot provide the requested installation guarantee.
-Imports are bounded and do not load the entire source into JavaScript or native
-memory.
+`collision` is `fail` or `replace`. With `fail`, rejection preserves an existing
+destination through a race-safe install-new primitive. With `replace`, use
+`atomicity: 'required'` when the old destination must survive any failed
+installation; `preferred` and `none` may use a non-atomic fallback. `atomicity`
+also accepts `preferred` or `none`. Imports are bounded and do not load the
+entire source into JavaScript or native memory.
 
 Android `content://` access uses the grant currently held by the app. The
 toolkit does not persist or renew grants; inspect and import while access is

@@ -32,6 +32,7 @@ export function ExternalSourceCard() {
     'Choose a document to import it into app-owned storage.',
   );
   const [isBusy, setIsBusy] = useState(false);
+  const canChooseDocument = !isBusy && result === undefined;
 
   const pickAndImport = useCallback(async () => {
     setIsBusy(true);
@@ -133,13 +134,13 @@ export function ExternalSourceCard() {
       <View style={styles.actions}>
         <Pressable
           accessibilityRole="button"
-          accessibilityState={{ busy: isBusy, disabled: isBusy }}
-          disabled={isBusy}
+          accessibilityState={{ busy: isBusy, disabled: !canChooseDocument }}
+          disabled={!canChooseDocument}
           onPress={() => void pickAndImport()}
           style={({ pressed }) => [
             styles.primaryButton,
             pressed && styles.buttonPressed,
-            isBusy && styles.buttonDisabled,
+            !canChooseDocument && styles.buttonDisabled,
           ]}>
           {isBusy ? (
             <ActivityIndicator color="#052e2b" />

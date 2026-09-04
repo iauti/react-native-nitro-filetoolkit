@@ -36,6 +36,17 @@ configuration to discover the workspace root. Avoid hard-coded
 rejects leading slashes, backslashes, empty path segments, `.` or `..`, and NUL
 bytes. Use `fromUri()` for an existing absolute `file://` URI.
 
+## A picker or shared URI is rejected
+
+Do not pass Android `content://` values to `fromUri()` or hand-author a
+`FileLocation`. Use `sourceFromUri()`, optionally call `inspectSource()`, then
+copy the data into app-owned storage with `importFile()`. iOS document pickers
+must provide an accessible `file://` URL; use `copyToCacheDirectory: true` with
+Expo Document Picker.
+
+Android URI access lasts only as long as the permission granted to the app.
+This package does not persist or renew provider grants, so import promptly.
+
 ## `readText()` reports a resource limit
 
 The file is larger than `maxByteCount`, or the value is larger than the

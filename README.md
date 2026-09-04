@@ -16,6 +16,8 @@ does not preserve the old package's API.
 
 - Native Swift and Kotlin implementations running work off the JS thread
 - Validated app-owned locations and absolute `file://` URIs
+- Read-only picker sources, including Android `content://` URIs
+- Bounded, staged imports into app-owned storage
 - Bounded text reads and explicit UTF encodings
 - Staged streaming writers with commit and abort semantics
 - Collision, missing-file, and atomicity policies instead of boolean flags
@@ -85,9 +87,44 @@ const info = await files.stat(note)
 const sha256 = await files.hash({ source: note, algorithm: 'sha-256' })
 ```
 
-`location()` accepts a managed root plus a portable relative path. Use
-`fromUri()` to validate an absolute external `file://` URI before passing it to
-another operation.
+`location()` accepts a managed root plus a portable relative path. `root()`
+returns the root itself. Use `fromUri()` for absolute local `file://` locations.
+
+## Import an external source
+
+Picker/share URIs are read-only `FileSource` capabilities. Android accepts
+`file://` and `content://`; iOS accepts `file://`. Import a source before using
+regular local file operations:
+
+```ts
+const source = files.sourceFromUri(pickerUri)
+const sourceInfo = await files.inspectSource(source)
+if (sourceInfo === undefined) throw new Error('The selected file is unavailable')
+
+if (sourceInfo.byteCount === undefined) {
+  // Import first, then use the returned local FileInfo.byteCount.
+}
+
+const imported = await files.importFile({
+  source,
+  destination: files.location('documents', 'imports/selected-file'),
+  collision: 'fail',
+  atomicity: 'preferred',
+})
+```
+
+`collision: 'fail'` preserves an existing destination; `'replace'` installs
+the new file through a sibling staging item. The toolkit does not persist or
+renew Android `content://` grants, so import while the app holds permission.
+
+## Migration notes for this breaking API
+
+- `FileLocation` now includes `origin: 'managed' | 'uri'`. Replace hand-authored
+  objects with `location()`, `root()`, or `fromUri()`.
+- Android `documents` now maps directly to `Context.filesDir`.
+- Convert picker/share URIs with `sourceFromUri()` and copy them locally with
+  `importFile()`; do not pass them to writable location APIs.
+- Android `content://` grants are not persisted by the toolkit.
 
 ## Streaming binary data
 
@@ -152,6 +189,7 @@ prebuild.
 - [x] Managed locations, metadata, and bounded text I/O
 - [x] Streaming readers and staged writers
 - [x] Copy, move, remove, hashing, disk space, and managed cleanup
+- [x] External source inspection and staged local imports
 - [ ] Durable download and upload tasks with retry, progress, and reattachment
 - [ ] Safe ZIP creation and extraction
 - [ ] Share, open-in, Photos, and MediaStore integration

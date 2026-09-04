@@ -6,12 +6,17 @@ export type ManagedDirectory =
   | 'temporary'
   | 'application-support'
 
-/**
- * A canonical, validated local or platform-owned URI.
- *
- * Create managed locations with `FileSystem.location()` and validate external
- * `file:` or Android `content:` URIs with `FileSystem.fromUri()`.
- */
+/** A canonical location inside an app-owned managed directory. */
 export interface FileLocation {
+  readonly kind: 'local'
   readonly uri: string
+}
+
+export type FileSourceScheme = 'file' | 'content'
+
+/** A read-only source URI that can be inspected or imported. */
+export interface FileSource {
+  readonly kind: 'source'
+  readonly uri: string
+  readonly scheme: FileSourceScheme
 }

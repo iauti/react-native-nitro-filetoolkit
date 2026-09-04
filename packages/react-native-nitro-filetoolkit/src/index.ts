@@ -10,6 +10,8 @@ export type {
 } from './types/FileInfo'
 export type {
   FileLocation,
+  FileSource,
+  FileSourceScheme,
   ManagedDirectory,
 } from './types/FileLocation'
 export type {
@@ -23,6 +25,7 @@ export type {
   FilePage,
   HashAlgorithm,
   HashOptions,
+  ImportFileOptions,
   ListOptions,
   MissingPolicy,
   MoveOptions,
@@ -30,6 +33,7 @@ export type {
   ReadChunk,
   ReadTextOptions,
   RemoveOptions,
+  SourceInfo,
   TextEncoding,
   WriteMode,
   WriteTextOptions,

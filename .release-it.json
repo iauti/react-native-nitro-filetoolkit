@@ -14,7 +14,7 @@
   },
   "hooks": {
     "before:init": "bun run check:ci",
-    "after:bump": "bun install && git add package.json packages/react-native-nitro-filetoolkit/package.json apps/example/package.json bun.lock CHANGELOG.md"
+    "after:bump": "bun install && git add package.json packages/react-native-nitro-filetoolkit/package.json apps/example/package.json bun.lock"
   },
   "plugins": {
     "@release-it/bumper": {
@@ -32,8 +32,7 @@
     "@release-it/conventional-changelog": {
       "preset": {
         "name": "conventionalcommits"
-      },
-      "infile": "CHANGELOG.md"
+      }
     }
   }
 }

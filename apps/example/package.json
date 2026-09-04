@@ -36,7 +36,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "verify:structure": "node ./scripts/verify-example-structure.mjs",
-    "harness": "react-native-harness"
+    "harness": "RN_HARNESS_DEBUG_USE_WATCHMAN=0 react-native-harness"
   },
   "private": true
 }

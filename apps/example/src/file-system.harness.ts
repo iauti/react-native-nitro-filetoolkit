@@ -49,6 +49,12 @@ describe('FileToolkit filesystem', () => {
     expect(() => files.fromUri('file:///tmp/encoded%00nul')).toThrow(
       '[file-toolkit/invalid-location]',
     );
+    expect(() => files.fromUri('file:///tmp/invalid-%FF.txt')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
+    expect(() => files.fromUri('file:///tmp/invalid-%C3%28.txt')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
     expect(files.fromUri('file:///tmp/valid%20name.txt').uri).toBe(
       'file:///tmp/valid%20name.txt',
     );

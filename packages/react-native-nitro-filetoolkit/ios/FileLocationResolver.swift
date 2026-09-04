@@ -32,6 +32,7 @@ final class FileLocationResolver {
     return location(for: candidate, origin: .managed)
   }
 
+  // Identity resolution preserves the final directory entry for lstat, link copies, moves, and removal.
   func url(from location: FileLocation) throws -> URL {
     let url = try url(fromUri: location.uri)
     if location.origin == .managed {
@@ -43,6 +44,22 @@ final class FileLocationResolver {
       }
     }
     return url
+  }
+
+  // Access resolution follows an existing leaf link and re-checks where managed access lands.
+  func urlForAccess(from location: FileLocation) throws -> URL {
+    let url = try url(from: location)
+    guard location.origin == .managed, isSymbolicLink(url) else { return url }
+    let resolved = url.resolvingSymlinksInPath().standardizedFileURL
+    let contained = try managedRootURLs().contains { root in
+      try isContainedByRoot(root, candidate: resolved)
+    }
+    guard contained else {
+      throw FileToolkitError.invalidLocation(
+        "managed symbolic link target is outside all managed directories"
+      )
+    }
+    return resolved
   }
 
   func fromUri(_ uri: String) throws -> FileLocation {
@@ -109,6 +126,8 @@ final class FileLocationResolver {
 
   private func hasValidFileURICharacters(_ value: String) -> Bool {
     let bytes = Array(value.utf8)
+    var decodedBytes: [UInt8] = []
+    decodedBytes.reserveCapacity(bytes.count)
     var index = 0
     while index < bytes.count {
       if bytes[index] == 0x25 {
@@ -121,15 +140,17 @@ final class FileLocationResolver {
         guard decoded != 0x2F, decoded != 0x5C, decoded != 0 else {
           return false
         }
+        decodedBytes.append(decoded)
         index += 3
       } else {
         guard Self.allowedFileURIBytes.contains(bytes[index]) else {
           return false
         }
+        decodedBytes.append(bytes[index])
         index += 1
       }
     }
-    return true
+    return String(bytes: decodedBytes, encoding: .utf8) != nil
   }
 
   private func hexValue(_ byte: UInt8) -> UInt8? {

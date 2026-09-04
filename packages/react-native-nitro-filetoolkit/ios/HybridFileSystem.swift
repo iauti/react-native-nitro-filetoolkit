@@ -41,7 +41,7 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func list(options: ListOptions) throws -> Promise<FilePage> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let directory = try resolver.url(from: options.directory)
+      let directory = try resolver.urlForAccess(from: options.directory)
       guard metadata.isDirectory(at: directory) else {
         throw FileToolkitError.invalidOperation("location is not a directory")
       }
@@ -82,7 +82,7 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func readText(options: ReadTextOptions) throws -> Promise<String> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      let url = try resolver.url(from: options.source)
+      let url = try resolver.urlForAccess(from: options.source)
       let limit = try Self.checkedInt(options.maxByteCount, name: "maxByteCount")
       let handle = try FileHandle(forReadingFrom: url)
       defer { try? handle.close() }
@@ -99,7 +99,12 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func writeText(options: WriteTextOptions) throws -> Promise<FileInfo> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let destination = try resolver.url(from: options.destination)
+      let destination = if options.mode == .append ||
+        (options.mode == .replace && options.atomicity == .none) {
+        try resolver.urlForAccess(from: options.destination)
+      } else {
+        try resolver.url(from: options.destination)
+      }
       guard let data = options.text.data(using: Self.stringEncoding(options.encoding)) else {
         throw FileToolkitError.invalidOperation("text cannot be encoded as \(options.encoding.stringValue)")
       }
@@ -121,14 +126,14 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func openReader(location: FileLocation) throws -> Promise<any HybridFileReaderSpec> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      let url = try resolver.url(from: location)
+      let url = try resolver.urlForAccess(from: location)
       return try HybridFileReader(location: location, url: url)
     }
   }
 
   func openWriter(options: OpenWriterOptions) throws -> Promise<any HybridFileWriterSpec> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let destination = try resolver.url(from: options.destination)
+      let destination = try resolver.urlForAccess(from: options.destination)
       try FileOperations.prepareParent(
         of: destination,
         create: options.createParentDirectories,
@@ -147,7 +152,7 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func createDirectory(options: CreateDirectoryOptions) throws -> Promise<FileInfo> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let url = try resolver.url(from: options.location)
+      let url = try resolver.urlForAccess(from: options.location)
       try fileManager.createDirectory(
         at: url,
         withIntermediateDirectories: options.createParentDirectories
@@ -158,7 +163,11 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func copy(options: CopyOptions) throws -> Promise<FileInfo> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      var source = try resolver.url(from: options.source)
+      var source = if options.followSymbolicLinks {
+        try resolver.urlForAccess(from: options.source)
+      } else {
+        try resolver.url(from: options.source)
+      }
       let destination = try resolver.url(from: options.destination)
       if options.followSymbolicLinks {
         source = source.resolvingSymlinksInPath()
@@ -225,7 +234,10 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func hash(options: HashOptions) throws -> Promise<String> {
     Promise.parallel(Self.ioQueue) { [resolver] in
-      try FileHasher.hash(url: resolver.url(from: options.source), algorithm: options.algorithm)
+      try FileHasher.hash(
+        url: resolver.urlForAccess(from: options.source),
+        algorithm: options.algorithm
+      )
     }
   }
 

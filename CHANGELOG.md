@@ -5,6 +5,19 @@ follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Managed root locations and strict canonical local file URIs.
+- Read-only `FileSource` inspection for local files and Android content
+  providers.
+- Bounded, staged source imports with explicit collision and atomicity policy.
+- Expo Document Picker import and cleanup example.
+
+### Changed
+
+- `FileLocation` now carries explicit managed/URI provenance.
+- Android `documents` maps directly to `Context.filesDir`.
+
 ## [0.1.0] - 2026-09-04
 
 ### Added

@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'react-native-harness';
+import { Platform } from 'react-native';
 import { FileToolkit } from 'react-native-nitro-filetoolkit';
 
 const files = FileToolkit.getFileSystem();
@@ -126,6 +127,15 @@ describe('FileToolkit filesystem', () => {
     await expect(
       files.inspectSource({ scheme: 'content', uri: 'file:///tmp/file.txt' }),
     ).rejects.toThrow('[file-toolkit/invalid-location]');
+  });
+
+  it('canonicalizes Android content source schemes', () => {
+    if (Platform.OS !== 'android') return;
+
+    expect(files.sourceFromUri('CONTENT://documents/report')).toEqual({
+      scheme: 'content',
+      uri: 'content://documents/report',
+    });
   });
 
   it('does not create managed roots during path-only operations', async () => {

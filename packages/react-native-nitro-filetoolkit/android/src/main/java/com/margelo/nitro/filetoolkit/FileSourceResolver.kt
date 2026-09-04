@@ -30,7 +30,10 @@ internal class FileSourceResolver(
         if (parsed.rawAuthority.isNullOrEmpty()) {
           throw FileToolkitException.invalidLocation("content URI must contain an authority")
         }
-        FileSource(uri = Uri.parse(value).toString(), scheme = FileSourceScheme.CONTENT)
+        FileSource(
+          uri = Uri.parse(value).normalizeScheme().toString(),
+          scheme = FileSourceScheme.CONTENT,
+        )
       }
       else -> throw FileToolkitException.invalidLocation(
         "only absolute file:// and content:// URIs are accepted",

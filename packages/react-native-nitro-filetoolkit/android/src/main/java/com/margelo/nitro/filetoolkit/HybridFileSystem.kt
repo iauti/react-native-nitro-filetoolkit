@@ -118,7 +118,10 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun openWriter(options: OpenWriterOptions): Promise<HybridFileWriterSpec> = Promise.parallel {
-    val destination = resolver.fileForAccess(options.destination)
+    val destination = resolver.file(options.destination)
+    if (options.mode == WriteMode.APPEND && metadata.exists(destination)) {
+      resolver.fileForAccess(options.destination)
+    }
     FileOperations.ensureParent(destination, options.createParentDirectories)
     HybridFileWriter(
       options.destination,

@@ -133,7 +133,10 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func openWriter(options: OpenWriterOptions) throws -> Promise<any HybridFileWriterSpec> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
-      let destination = try resolver.urlForAccess(from: options.destination)
+      let destination = try resolver.url(from: options.destination)
+      if options.mode == .append, metadata.exists(at: destination) {
+        _ = try resolver.urlForAccess(from: options.destination)
+      }
       try FileOperations.prepareParent(
         of: destination,
         create: options.createParentDirectories,

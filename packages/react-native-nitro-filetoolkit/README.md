@@ -145,6 +145,19 @@ try {
 Full documentation and runnable examples:
 [github.com/iauti/react-native-nitro-filetoolkit](https://github.com/iauti/react-native-nitro-filetoolkit).
 
+## Roadmap
+
+- [x] Filesystem locations, text and binary I/O, metadata, and mutations
+- [x] Hashing, disk-space reporting, and managed-directory cleanup
+- [ ] Durable downloads and uploads
+- [ ] Safe archive creation and extraction
+- [ ] Sharing, external opening, Photos, and MediaStore
+- [ ] Transfer and WebView cookie stores
+- [ ] React task hooks
+
+Unchecked domains are not placeholder exports; they will enter the public API
+only after both native implementations and behavior tests are complete.
+
 ## License
 
 MIT © IAUTI Labs

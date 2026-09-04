@@ -147,6 +147,21 @@ The Expo Router example is in `apps/example`. Generated iOS and Android example
 projects intentionally remain untracked and can be recreated with Expo
 prebuild.
 
+## Roadmap
+
+- [x] Managed locations, metadata, and bounded text I/O
+- [x] Streaming readers and staged writers
+- [x] Copy, move, remove, hashing, disk space, and managed cleanup
+- [ ] Durable download and upload tasks with retry, progress, and reattachment
+- [ ] Safe ZIP creation and extraction
+- [ ] Share, open-in, Photos, and MediaStore integration
+- [ ] Explicit transfer and WebView cookie stores
+- [ ] React hooks over durable task snapshots
+
+Roadmap items are intentionally not exported as placeholder APIs. Each domain
+will be added only when its iOS and Android behavior, lifecycle, and tests are
+ready to ship.
+
 ## License
 
 MIT © IAUTI Labs

@@ -43,6 +43,7 @@
     "clean": "rm -rf android/build node_modules/**/android/build lib",
     "lint": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
     "lint-ci": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --max-warnings 0",
+    "release": "release-it",
     "test": "tsc -p tests/tsconfig.json --noEmit",
     "typescript": "tsc",
     "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\"",

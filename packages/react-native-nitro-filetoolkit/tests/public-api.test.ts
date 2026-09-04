@@ -1,19 +1,25 @@
 import type {
+  FileInfo,
   FileLocation,
+  FileLocationOrigin,
   FileSource,
+  FileSourceScheme,
   FileSystem,
   FileToolkitFactory,
   ImportFileOptions,
+  SourceInfo,
 } from '../src/index'
 
+export const managedOrigin: FileLocationOrigin = 'managed'
+export const contentScheme: FileSourceScheme = 'content'
+
 export const location: FileLocation = {
-  kind: 'local',
+  origin: managedOrigin,
   uri: 'file:///documents/reports/annual.pdf',
 }
 
 export const source: FileSource = {
-  kind: 'source',
-  scheme: 'content',
+  scheme: contentScheme,
   uri: 'content://documents/report.pdf',
 }
 
@@ -36,11 +42,16 @@ declare const factory: FileToolkitFactory
 
 const files = factory.getFileSystem()
 
-files.fromUri('file:///documents/report.pdf')
-files.root('documents')
-files.sourceFromUri('content://documents/report.pdf')
-files.inspectSource(source)
-files.importFile(importOptions)
+export const uriLocation: FileLocation = files.fromUri(
+  'file:///documents/report.pdf',
+)
+export const documentRoot: FileLocation = files.root('documents')
+export const externalSource: FileSource = files.sourceFromUri(
+  'content://documents/report.pdf',
+)
+export const inspectedSource: Promise<SourceInfo | undefined> =
+  files.inspectSource(source)
+export const importedFile: Promise<FileInfo> = files.importFile(importOptions)
 
 files.remove({
   // @ts-expect-error external sources are read-only and cannot be removed

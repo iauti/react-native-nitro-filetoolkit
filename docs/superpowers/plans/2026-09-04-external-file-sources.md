@@ -4,7 +4,7 @@
 
 **Goal:** Add capability-safe external file sources, Android `content://` inspection/import, managed root locations, and consistent local URI/root behavior.
 
-**Architecture:** Keep writable local `FileLocation` values separate from read-only `FileSource` values using incompatible discriminants. Extend the existing lazy `FileSystem` HybridObject with source inspection/import, while keeping URI validation and source opening in focused platform resolvers and reusing staged destination installation for atomicity.
+**Architecture:** Keep writable local `FileLocation` values separate from read-only `FileSource` values using incompatible, meaningful provenance and scheme fields supported by Nitrogen 0.37.1. Extend the existing lazy `FileSystem` HybridObject with source inspection/import, while keeping URI validation and source opening in focused platform resolvers and reusing staged destination installation for atomicity.
 
 **Tech Stack:** TypeScript 6, Nitrogen 0.37.1, React Native Nitro Modules 0.37.1, Kotlin/Android `ContentResolver`, Swift/Foundation `FileManager`, Expo SDK 57 Router example, React Native Harness.
 
@@ -12,7 +12,7 @@
 
 ## File map
 
-- Modify `packages/react-native-nitro-filetoolkit/src/types/FileLocation.ts`: add the local-location discriminant and source types.
+- Modify `packages/react-native-nitro-filetoolkit/src/types/FileLocation.ts`: add local-location provenance and source types.
 - Modify `packages/react-native-nitro-filetoolkit/src/types/FileOptions.ts`: add `ImportFileOptions`.
 - Modify `packages/react-native-nitro-filetoolkit/src/specs/FileSystem.nitro.ts`: add roots and source operations.
 - Modify `packages/react-native-nitro-filetoolkit/src/index.ts`: export the new public types.
@@ -22,11 +22,11 @@
 - Create `packages/react-native-nitro-filetoolkit/android/.../FileSourceResolver.kt`: Android source validation, metadata, and input streams.
 - Modify `packages/react-native-nitro-filetoolkit/android/.../FileOperations.kt`: staged stream import helper.
 - Modify `packages/react-native-nitro-filetoolkit/android/.../HybridFileSystem.kt`: expose root/source/import operations.
-- Modify `packages/react-native-nitro-filetoolkit/ios/FileLocationResolver.swift`: local discriminant and roots.
+- Modify `packages/react-native-nitro-filetoolkit/ios/FileLocationResolver.swift`: local provenance and roots.
 - Create `packages/react-native-nitro-filetoolkit/ios/FileSourceResolver.swift`: iOS source validation and metadata.
 - Modify `packages/react-native-nitro-filetoolkit/ios/FileOperations.swift`: staged source import helper.
 - Modify `packages/react-native-nitro-filetoolkit/ios/HybridFileSystem.swift`: expose root/source/import operations.
-- Modify `packages/react-native-nitro-filetoolkit/ios/FileMetadataMapper.swift`: construct discriminated locations.
+- Modify `packages/react-native-nitro-filetoolkit/ios/FileMetadataMapper.swift`: construct locations with provenance.
 - Regenerate `packages/react-native-nitro-filetoolkit/nitrogen/`: generated bindings for the breaking contract.
 - Modify `apps/example/package.json`: add the SDK-compatible document picker.
 - Modify `apps/example/src/examples/file-system-examples.ts`: managed-root and file-source examples.
@@ -52,28 +52,35 @@ Add representative values and negative assignments:
 
 ```ts
 import type {
+  FileInfo,
   FileLocation,
+  FileLocationOrigin,
   FileSource,
+  FileSourceScheme,
   FileSystem,
   ImportFileOptions,
+  SourceInfo,
 } from '../src/index'
 
+export const managedOrigin: FileLocationOrigin = 'managed'
+export const contentScheme: FileSourceScheme = 'content'
+
 export const localLocation: FileLocation = {
-  kind: 'local',
+  origin: managedOrigin,
   uri: 'file:///documents/report.pdf',
 }
 
 export const contentSource: FileSource = {
-  kind: 'source',
-  scheme: 'content',
+  scheme: contentScheme,
   uri: 'content://documents/report',
 }
 
 declare const files: FileSystem
 
-files.root('documents')
-files.sourceFromUri('content://documents/report')
-files.inspectSource(contentSource)
+export const uriLocation: FileLocation = files.fromUri('file:///documents/report.pdf')
+export const root: FileLocation = files.root('documents')
+export const source: FileSource = files.sourceFromUri('content://documents/report')
+export const info: Promise<SourceInfo | undefined> = files.inspectSource(contentSource)
 
 export const importOptions: ImportFileOptions = {
   source: contentSource,
@@ -82,12 +89,16 @@ export const importOptions: ImportFileOptions = {
   atomicity: 'preferred',
 }
 
-files.importFile(importOptions)
+export const imported: Promise<FileInfo> = files.importFile(importOptions)
 
-// @ts-expect-error a read-only source cannot be removed
-files.remove({ location: contentSource, recursive: false, missing: 'fail' })
-// @ts-expect-error a read-only source cannot be moved
+files.remove({
+  // @ts-expect-error a read-only source cannot be removed
+  location: contentSource,
+  recursive: false,
+  missing: 'fail',
+})
 files.move({
+  // @ts-expect-error a read-only source cannot be moved
   source: contentSource,
   destination: localLocation,
   collision: 'fail',
@@ -114,15 +125,16 @@ export type ManagedDirectory =
   | 'temporary'
   | 'application-support'
 
+export type FileLocationOrigin = 'managed' | 'uri'
+
 export interface FileLocation {
-  readonly kind: 'local'
+  readonly origin: FileLocationOrigin
   readonly uri: string
 }
 
 export type FileSourceScheme = 'file' | 'content'
 
 export interface FileSource {
-  readonly kind: 'source'
   readonly uri: string
   readonly scheme: FileSourceScheme
 }
@@ -154,7 +166,7 @@ inspectSource(source: FileSource): Promise<SourceInfo | undefined>
 importFile(options: ImportFileOptions): Promise<FileInfo>
 ```
 
-Export `FileSource`, `FileSourceScheme`, `SourceInfo`, and
+Export `FileLocationOrigin`, `FileSource`, `FileSourceScheme`, `SourceInfo`, and
 `ImportFileOptions` from `src/index.ts`.
 
 - [ ] **Step 4: Add a compiling documentation workflow**
@@ -199,7 +211,7 @@ git commit -m "feat: define external file source API"
 Run: `bun run specs`
 
 Expected: generated Swift, Kotlin, C++, and autolinking types include
-`FileSource`, `SourceInfo`, `ImportFileOptions`, `FileLocation.kind`, and the
+`FileSource`, `SourceInfo`, `ImportFileOptions`, `FileLocation.origin`, and the
 four new `FileSystem` methods.
 
 - [ ] **Step 2: Inspect generated signatures**
@@ -244,8 +256,8 @@ git commit -m "chore: regenerate external source bindings"
 it('returns managed roots and canonical local file URIs', () => {
   const documents = files.root('documents')
   const cache = files.root('cache')
-  expect(documents.kind).toBe('local')
-  expect(cache.kind).toBe('local')
+  expect(documents.origin).toBe('managed')
+  expect(cache.origin).toBe('managed')
   expect(documents.uri.startsWith('file:///')).toBe(true)
   expect(cache.uri.startsWith('file:///')).toBe(true)
 
@@ -258,11 +270,11 @@ it('returns managed roots and canonical local file URIs', () => {
 
 Run: `bun run --cwd apps/example harness -- --harnessRunner ios`
 
-Expected: FAIL because `root()` and `FileLocation.kind` are unimplemented.
+Expected: FAIL because `root()` and `FileLocation.origin` are unimplemented.
 
 - [ ] **Step 3: Implement Android roots and URI normalization**
 
-Change Documents to `context.filesDir`, return a discriminated location, and
+Change Documents to `context.filesDir`, return a provenance-tagged location, and
 use `android.net.Uri.fromFile`:
 
 ```kt
@@ -274,29 +286,31 @@ fun root(directory: ManagedDirectory): File = when (directory) {
   ManagedDirectory.APPLICATION_SUPPORT -> File(context.filesDir, "ApplicationSupport")
 }.absoluteFile
 
-internal fun File.toLocation(): FileLocation = FileLocation(
-  kind = FileLocationKind.LOCAL,
+internal fun File.toLocation(origin: FileLocationOrigin): FileLocation = FileLocation(
+  origin = origin,
   uri = android.net.Uri.fromFile(absoluteFile).normalizeScheme().toString(),
 )
 ```
 
 Have `HybridFileSystem.root()` create the root when necessary and return
-`resolver.root(directory).toLocation()`. Revalidate `kind == LOCAL` before
-resolving every incoming location.
+`resolver.root(directory).toLocation(FileLocationOrigin.MANAGED)`. Both
+`root()` and `location()` return `origin = MANAGED`; `fromUri()` validates and
+normalizes a local file URI and returns `origin = URI`. Revalidate the origin
+and URI before resolving every incoming location.
 
-- [ ] **Step 4: Implement Swift roots and discriminated locations**
+- [ ] **Step 4: Implement Swift roots and location provenance**
 
 ```swift
 func root(directory: ManagedDirectory) throws -> FileLocation {
   let url = try rootURL(for: directory).standardizedFileURL
   try fileManager.createDirectory(at: url, withIntermediateDirectories: true)
-  return FileLocation(kind: .local, uri: url.absoluteString)
+  return FileLocation(origin: .managed, uri: url.absoluteString)
 }
 ```
 
-Construct `.local` locations in `location()`, `fromUri()`, symbolic-link
-metadata, and regular metadata. Revalidate the location discriminant and URI in
-`url(from:)`.
+Construct `.managed` locations in `root()` and `location()`, and `.uri`
+locations in `fromUri()`. Preserve the appropriate origin in symbolic-link and
+regular metadata. Revalidate the location origin and URI in `url(from:)`.
 
 - [ ] **Step 5: Run platform Harness coverage**
 
@@ -341,7 +355,7 @@ it('validates and inspects a local file source', async () => {
   })
 
   const source = files.sourceFromUri(location.uri)
-  expect(source).toEqual({ kind: 'source', scheme: 'file', uri: location.uri })
+  expect(source).toEqual({ scheme: 'file', uri: location.uri })
   const info = await files.inspectSource(source)
   expect(info?.byteCount).toBe(6n)
   expect(info?.name).toBe('source-info.txt')
@@ -383,8 +397,9 @@ Rules:
 - Parse with `android.net.Uri.parse` and require an absolute `file` or `content`
   scheme.
 - Normalize file sources through `FileLocationResolver`.
-- Return `FileSource(kind = SOURCE, scheme = FILE|CONTENT, uri = normalized)`.
-- Revalidate the discriminant, declared scheme, and actual URI scheme on every
+- Return `FileSource(scheme = FILE|CONTENT, uri = normalized)`; the source
+  resolver returns only the validated scheme and normalized URI.
+- Revalidate the declared scheme and actual URI scheme on every
   method.
 - Inspect files with `FileMetadataMapper`.
 - Query content metadata with a `use`-scoped cursor over
@@ -406,9 +421,9 @@ final class FileSourceResolver {
 }
 ```
 
-Only absolute file URLs are accepted. Return `.source`/`.file` discriminants,
-use `FileManager` metadata for name and size, return `nil` for a missing file,
-and reject forged or inconsistent structs.
+Only absolute file URLs are accepted. Return only the `.file` scheme and
+normalized URI, use `FileManager` metadata for name and size, return `nil` for
+a missing file, and reject forged or inconsistent structs.
 
 - [ ] **Step 5: Wire asynchronous inspection into `HybridFileSystem`**
 
@@ -666,7 +681,7 @@ if (info.byteCount === undefined) {
 
 State explicitly:
 
-- `FileLocation` now includes `kind: 'local'`.
+- `FileLocation` now includes `origin: 'managed' | 'uri'`.
 - Hand-authored locations should be replaced with `location()`, `root()`, or
   `fromUri()`.
 - Android `documents` now maps to `Context.filesDir`.

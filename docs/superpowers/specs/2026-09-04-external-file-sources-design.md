@@ -38,13 +38,15 @@ transfers, arbitrary raw-path APIs, and compatibility with Nitro 0.35.
 used by local read, write, move, copy, hash, and removal operations.
 
 ```ts
+export type FileLocationOrigin = 'managed' | 'uri'
+
 export interface FileLocation {
-  readonly kind: 'local'
+  readonly origin: FileLocationOrigin
   readonly uri: string
 }
 ```
 
-The filesystem exposes two ways to obtain one:
+The filesystem exposes three ways to obtain one:
 
 ```ts
 root(directory: ManagedDirectory): FileLocation
@@ -52,11 +54,12 @@ location(directory: ManagedDirectory, relativePath: string): FileLocation
 fromUri(uri: string): FileLocation
 ```
 
-- `root()` returns the selected managed root itself.
-- `location()` retains its strict non-empty portable-relative-path validation.
-- `fromUri()` remains file-only and rejects `content:`, network, and relative
-  URIs. This is needed for writable local files produced by native libraries,
-  such as compressor output.
+- `root()` returns the selected managed root itself with `origin: 'managed'`.
+- `location()` returns `origin: 'managed'` and retains its strict non-empty
+  portable-relative-path validation.
+- `fromUri()` returns `origin: 'uri'`, remains file-only, and rejects
+  `content:`, network, and relative URIs. This is needed for writable local
+  files produced by native libraries, such as compressor output.
 
 ### Read-only sources
 
@@ -67,7 +70,6 @@ file. Its scheme is resolved and validated natively.
 export type FileSourceScheme = 'file' | 'content'
 
 export interface FileSource {
-  readonly kind: 'source'
   readonly uri: string
   readonly scheme: FileSourceScheme
 }
@@ -90,10 +92,11 @@ importFile(options: ImportFileOptions): Promise<FileInfo>
 `sourceFromUri()` accepts absolute `file:` URIs on both platforms and
 `content:` URIs on Android. iOS rejects `content:` immediately because the
 platform has no equivalent URI scheme. Unknown schemes are rejected on both
-platforms. The distinct `kind` discriminants make `FileSource` and
-`FileLocation` structurally incompatible in TypeScript. Native code still
-revalidates every received URI, scheme, and discriminant because JavaScript
-objects can be forged at runtime.
+platforms. The required `origin` field on `FileLocation` and `scheme` field on
+`FileSource` make the types structurally incompatible in TypeScript while using
+meaningful unions supported by Nitrogen 0.37.1. Native code still revalidates
+every received URI, location origin, and declared source scheme because
+JavaScript objects can be forged at runtime.
 
 `inspectSource()` returns `undefined` when the source is unavailable. A present
 source may still have an unknown `name` or `byteCount`; Android content
@@ -147,7 +150,9 @@ is provided.
 
 Local locations are emitted through Android URI APIs as canonical
 `file:///absolute/path` strings rather than Java `File.toURI()`'s commonly
-observed `file:/absolute/path` spelling.
+observed `file:/absolute/path` spelling. `root()` and `location()` emit
+`origin: 'managed'`; `fromUri()` emits `origin: 'uri'` after validating and
+normalizing the local file URI.
 
 For a `content:` source:
 
@@ -168,9 +173,12 @@ it while its picker or share grant is valid.
 
 ### iOS
 
-`root()` uses the existing `FileManager` roots. A `file:` source is inspected
-and imported using the same metadata and staged-copy primitives as local file
-copying. `content:` and unknown URI schemes are rejected during source creation.
+`root()` and `location()` use the existing `FileManager` roots and emit
+`origin: 'managed'`; `fromUri()` validates a local file URL and emits
+`origin: 'uri'`. A `file:` source is inspected and imported using the same
+metadata and staged-copy primitives as local file copying. `content:` and
+unknown URI schemes are rejected during source creation. Source resolvers emit
+only the validated `scheme` and normalized `uri` fields.
 
 ### Threading and memory
 

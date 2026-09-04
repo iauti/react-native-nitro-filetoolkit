@@ -10,6 +10,7 @@ export type {
 } from './types/FileInfo'
 export type {
   FileLocation,
+  FileLocationOrigin,
   FileSource,
   FileSourceScheme,
   ManagedDirectory,

@@ -26,6 +26,7 @@ export const importOptions: ImportFileOptions = {
 
 export type FactoryContract = FileToolkitFactory
 export type FileSystemContract = FileSystem
+export type FromUriContract = FileSystem['fromUri']
 export type RootContract = FileSystem['root']
 export type SourceFromUriContract = FileSystem['sourceFromUri']
 export type InspectSourceContract = FileSystem['inspectSource']
@@ -35,6 +36,7 @@ declare const factory: FileToolkitFactory
 
 const files = factory.getFileSystem()
 
+files.fromUri('file:///documents/report.pdf')
 files.root('documents')
 files.sourceFromUri('content://documents/report.pdf')
 files.inspectSource(source)

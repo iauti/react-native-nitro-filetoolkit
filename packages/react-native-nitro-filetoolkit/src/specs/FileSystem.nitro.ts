@@ -31,6 +31,7 @@ export interface FileSystem
     directory: ManagedDirectory,
     relativePath: string,
   ): FileLocation
+  fromUri(uri: string): FileLocation
   root(directory: ManagedDirectory): FileLocation
   sourceFromUri(uri: string): FileSource
   inspectSource(source: FileSource): Promise<SourceInfo | undefined>

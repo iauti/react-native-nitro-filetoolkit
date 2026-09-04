@@ -6,7 +6,7 @@ export type ManagedDirectory =
   | 'temporary'
   | 'application-support'
 
-/** A canonical location inside an app-owned managed directory. */
+/** A canonical, validated local file location. */
 export interface FileLocation {
   readonly kind: 'local'
   readonly uri: string

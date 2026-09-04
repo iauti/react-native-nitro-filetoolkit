@@ -19,13 +19,27 @@ describe('FileToolkit filesystem', () => {
 
   it('constructs contained locations and rejects traversal', () => {
     const location = files.location('documents', 'reports/annual.pdf');
+    expect(location.origin).toBe('managed');
     expect(location.uri.startsWith('file://')).toBe(true);
+    expect(files.fromUri(location.uri).origin).toBe('uri');
     expect(() => files.location('documents', '../outside.txt')).toThrow(
       '[file-toolkit/invalid-location]',
     );
     expect(() => files.fromUri('https://example.com/a')).toThrow(
       '[file-toolkit/invalid-location]',
     );
+  });
+
+  it('returns managed roots and canonical local file URIs', () => {
+    const documents = files.root('documents');
+    const cache = files.root('cache');
+    const document = files.location('documents', 'reports/annual.pdf');
+
+    expect(documents.origin).toBe('managed');
+    expect(cache.origin).toBe('managed');
+    expect(documents.uri.startsWith('file:///')).toBe(true);
+    expect(cache.uri.startsWith('file:///')).toBe(true);
+    expect(document.uri.startsWith(`${documents.uri}/`)).toBe(true);
   });
 
   it('writes, reads, lists, hashes, copies, moves, and removes files', async () => {

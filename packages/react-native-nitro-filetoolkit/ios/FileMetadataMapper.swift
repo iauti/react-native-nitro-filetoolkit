@@ -26,7 +26,10 @@ final class FileMetadataMapper {
       let targetURL = target.hasPrefix("/")
         ? URL(fileURLWithPath: target)
         : url.deletingLastPathComponent().appendingPathComponent(target)
-      symbolicLinkTarget = FileLocation(uri: targetURL.standardizedFileURL.absoluteString)
+      symbolicLinkTarget = FileLocation(
+        origin: .uri,
+        uri: URL(fileURLWithPath: targetURL.standardizedFileURL.path).absoluteString
+      )
     default:
       kind = .file
       byteCount = (attributes[.size] as? NSNumber)?.uint64Value
@@ -35,7 +38,10 @@ final class FileMetadataMapper {
 
     return FileInfo(
       kind: kind,
-      location: FileLocation(uri: url.standardizedFileURL.absoluteString),
+      location: FileLocation(
+        origin: .uri,
+        uri: URL(fileURLWithPath: url.standardizedFileURL.path).absoluteString
+      ),
       name: url.lastPathComponent,
       byteCount: byteCount,
       symbolicLinkTarget: symbolicLinkTarget,

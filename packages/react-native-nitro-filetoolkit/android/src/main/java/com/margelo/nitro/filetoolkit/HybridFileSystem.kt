@@ -18,6 +18,8 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
 
   override fun fromUri(uri: String): FileLocation = resolver.fromUri(uri)
 
+  override fun root(directory: ManagedDirectory): FileLocation = resolver.rootLocation(directory)
+
   override fun stat(location: FileLocation): Promise<FileInfo?> = Promise.parallel {
     val file = resolver.file(location)
     if (metadata.exists(file)) metadata.info(file) else null

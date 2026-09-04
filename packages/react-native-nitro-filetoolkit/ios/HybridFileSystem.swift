@@ -27,6 +27,10 @@ final class HybridFileSystem: HybridFileSystemSpec {
     try resolver.fromUri(uri)
   }
 
+  func root(directory: ManagedDirectory) throws -> FileLocation {
+    try resolver.root(directory)
+  }
+
   func stat(location: FileLocation) throws -> Promise<FileInfo?> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata, fileManager] in
       let url = try resolver.url(from: location)

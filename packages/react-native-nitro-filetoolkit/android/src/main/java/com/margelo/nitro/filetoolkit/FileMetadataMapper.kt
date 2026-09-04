@@ -1,5 +1,6 @@
 package com.margelo.nitro.filetoolkit
 
+import android.net.Uri
 import android.os.Build
 import android.system.ErrnoException
 import android.system.Os
@@ -29,7 +30,7 @@ internal class FileMetadataMapper {
     val linkTarget = if (kind == FileKind.SYMBOLIC_LINK) {
       val rawTarget = Os.readlink(file.path)
       val target = if (rawTarget.startsWith('/')) File(rawTarget) else File(file.parentFile, rawTarget)
-      target.absoluteFile.toLocation()
+      uriLocation(target)
     } else {
       null
     }
@@ -40,12 +41,17 @@ internal class FileMetadataMapper {
     }
     return FileInfo(
       kind = kind,
-      location = file.absoluteFile.toLocation(),
+      location = uriLocation(file),
       name = file.name,
       byteCount = if (kind == FileKind.FILE) stat.st_size else null,
       symbolicLinkTarget = linkTarget,
       createdAt = null,
       modifiedAt = modifiedAt,
     )
+  }
+
+  private fun uriLocation(file: File): FileLocation {
+    val canonical = file.canonicalFile
+    return FileLocation(FileLocationOrigin.URI, Uri.fromFile(canonical.absoluteFile).toString())
   }
 }

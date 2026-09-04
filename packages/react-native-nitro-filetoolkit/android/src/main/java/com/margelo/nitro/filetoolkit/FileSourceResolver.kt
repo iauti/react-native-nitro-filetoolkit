@@ -4,6 +4,9 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import android.system.ErrnoException
+import android.system.Os
+import android.system.OsConstants
 import com.margelo.nitro.NitroModules
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -70,19 +73,27 @@ internal class FileSourceResolver(
 
   private fun inspectFile(source: FileSource): SourceInfo? {
     val file = locations.fromUri(source.uri).let(locations::file)
-    if (!metadata.exists(file)) return null
+    try {
+      Os.lstat(file.path)
+    } catch (error: ErrnoException) {
+      if (error.errno == OsConstants.ENOENT || error.errno == OsConstants.ENOTDIR) {
+        return null
+      }
+      throw FileToolkitException.invalidOperation("source metadata cannot be read", error)
+    }
     val info = metadata.info(file)
     return SourceInfo(source = source, name = info.name, byteCount = info.byteCount?.toULong())
   }
 
   private fun inspectContent(source: FileSource): SourceInfo? = try {
-    contentResolver.query(
+    val cursor = contentResolver.query(
       Uri.parse(source.uri),
       arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
       null,
       null,
       null,
-    )?.use { cursor ->
+    ) ?: throw FileToolkitException.invalidOperation("source metadata provider returned no result")
+    cursor.use {
       if (!cursor.moveToFirst()) return null
 
       val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)

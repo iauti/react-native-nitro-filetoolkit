@@ -87,6 +87,47 @@ describe('FileToolkit filesystem', () => {
     ).toBe(true);
   });
 
+  it('validates and inspects a local file source', async () => {
+    const location = files.location(
+      'temporary',
+      'file-toolkit-harness/source-info.txt',
+    );
+    await files.writeText({
+      destination: location,
+      text: 'source',
+      encoding: 'utf-8',
+      mode: 'replace',
+      atomicity: 'preferred',
+      createParentDirectories: true,
+    });
+
+    const source = files.sourceFromUri(location.uri);
+    expect(source).toEqual({ scheme: 'file', uri: location.uri });
+    const info = await files.inspectSource(source);
+    expect(info?.source).toEqual(source);
+    expect(info?.byteCount).toBe(6n);
+    expect(info?.name).toBe('source-info.txt');
+    expect(
+      await files.inspectSource(
+        files.sourceFromUri(
+          files.location(
+            'temporary',
+            'file-toolkit-harness/missing.txt',
+          ).uri,
+        ),
+      ),
+    ).toBeUndefined();
+  });
+
+  it('rejects unsupported and forged file sources', async () => {
+    expect(() => files.sourceFromUri('https://example.com/file')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
+    await expect(
+      files.inspectSource({ scheme: 'content', uri: 'file:///tmp/file.txt' }),
+    ).rejects.toThrow('[file-toolkit/invalid-location]');
+  });
+
   it('does not create managed roots during path-only operations', async () => {
     const downloads = files.root('downloads');
     await files.remove({

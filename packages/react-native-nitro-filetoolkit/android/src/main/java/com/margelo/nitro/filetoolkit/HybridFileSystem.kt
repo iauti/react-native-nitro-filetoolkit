@@ -11,6 +11,7 @@ import java.nio.charset.CodingErrorAction
 
 internal class HybridFileSystem : HybridFileSystemSpec() {
   private val resolver = FileLocationResolver()
+  private val sourceResolver = FileSourceResolver(locations = resolver)
   private val metadata = FileMetadataMapper()
 
   override fun location(directory: ManagedDirectory, relativePath: String): FileLocation =
@@ -19,6 +20,12 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   override fun fromUri(uri: String): FileLocation = resolver.fromUri(uri)
 
   override fun root(directory: ManagedDirectory): FileLocation = resolver.rootLocation(directory)
+
+  override fun sourceFromUri(uri: String): FileSource = sourceResolver.sourceFromUri(uri)
+
+  override fun inspectSource(source: FileSource): Promise<SourceInfo?> = Promise.parallel {
+    sourceResolver.inspect(source)
+  }
 
   override fun stat(location: FileLocation): Promise<FileInfo?> = Promise.parallel {
     val file = resolver.file(location)

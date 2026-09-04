@@ -9,12 +9,14 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   private let fileManager: FileManager
   private let resolver: FileLocationResolver
+  private let sourceResolver: FileSourceResolver
   private let metadata: FileMetadataMapper
 
   override init() {
     let fileManager = FileManager.default
     self.fileManager = fileManager
     resolver = FileLocationResolver(fileManager: fileManager)
+    sourceResolver = FileSourceResolver(fileManager: fileManager, locations: resolver)
     metadata = FileMetadataMapper(fileManager: fileManager)
     super.init()
   }
@@ -29,6 +31,16 @@ final class HybridFileSystem: HybridFileSystemSpec {
 
   func root(directory: ManagedDirectory) throws -> FileLocation {
     try resolver.root(directory)
+  }
+
+  func sourceFromUri(uri: String) throws -> FileSource {
+    try sourceResolver.sourceFromUri(uri)
+  }
+
+  func inspectSource(source: FileSource) throws -> Promise<SourceInfo?> {
+    Promise.parallel(Self.ioQueue) { [sourceResolver] in
+      try sourceResolver.inspect(source)
+    }
   }
 
   func stat(location: FileLocation) throws -> Promise<FileInfo?> {

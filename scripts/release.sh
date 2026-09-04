@@ -2,5 +2,8 @@
 
 set -euo pipefail
 
-bun run --cwd packages/react-native-nitro-filetoolkit release "$@"
+(
+  cd packages/react-native-nitro-filetoolkit
+  bun release "$@"
+)
 bun run release-it "$@"

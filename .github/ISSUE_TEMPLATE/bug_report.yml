@@ -1,0 +1,88 @@
+name: Bug report
+description: Report reproducible incorrect behavior in the package.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve React Native Nitro File Toolkit. For security
+        vulnerabilities, use the private security advisory link instead.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+      placeholder: The operation returned… I expected…
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide the smallest runnable example or a repository link.
+      placeholder: |
+        const files = FileToolkit.getFileSystem()
+        // Steps that reproduce the problem
+      render: typescript
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platforms
+    attributes:
+      label: Affected platforms
+      description: Select every platform where you reproduced the issue.
+      multiple: true
+      options:
+        - iOS
+        - Android
+    validations:
+      required: true
+
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions and environment
+      description: Include exact versions and whether the New Architecture is enabled.
+      placeholder: |
+        react-native-nitro-filetoolkit:
+        react-native-nitro-modules:
+        react-native:
+        expo (if applicable):
+        OS/device:
+        New Architecture: enabled
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Paste the complete error and native stack trace when available. Remove secrets and personal paths.
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add anything else that could help reproduce or diagnose the issue.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I searched existing issues for duplicates.
+          required: true
+        - label: I can reproduce this in a development build, not Expo Go.
+          required: true
+        - label: I removed secrets and sensitive file contents from this report.
+          required: true

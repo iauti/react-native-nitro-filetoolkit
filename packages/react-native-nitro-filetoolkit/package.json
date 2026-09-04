@@ -1,12 +1,22 @@
 {
   "name": "react-native-nitro-filetoolkit",
   "version": "0.0.1",
-  "description": "Type-safe filesystem, durable transfer, archive, and content APIs for React Native powered by Nitro Modules",
-  "main": "lib/index",
-  "module": "lib/index",
+  "description": "Fast, type-safe native filesystem APIs for React Native powered by Nitro Modules",
+  "type": "module",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
   "types": "lib/index.d.ts",
   "react-native": "src/index",
   "source": "src/index",
+  "exports": {
+    ".": {
+      "react-native": "./src/index.ts",
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
+  "sideEffects": false,
   "files": [
     "src",
     "react-native.config.js",
@@ -23,10 +33,10 @@
     "ios/**/*.mm",
     "ios/**/*.cpp",
     "ios/**/*.swift",
-    "app.plugin.js",
     "nitro.json",
     "*.podspec",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -35,27 +45,34 @@
     "lint-ci": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --max-warnings 0",
     "test": "tsc -p tests/tsconfig.json --noEmit",
     "typescript": "tsc",
-    "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\""
+    "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\"",
+    "prepack": "bun run specs && bun run test && bun run lint-ci && bun run typescript"
   },
   "keywords": [
     "react-native",
+    "react-native-library",
+    "nitro-modules",
     "nitro",
     "filesystem",
+    "file-system",
+    "file-io",
     "download",
     "upload",
-    "archive"
+    "ios",
+    "android"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chavan-labs/react-native-nitro-filetoolkit.git"
+    "url": "git+https://github.com/iauti/react-native-nitro-filetoolkit.git"
   },
-  "author": "Chavan Labs",
+  "author": "IAUTI Labs",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/chavan-labs/react-native-nitro-filetoolkit/issues"
+    "url": "https://github.com/iauti/react-native-nitro-filetoolkit/issues"
   },
-  "homepage": "https://github.com/chavan-labs/react-native-nitro-filetoolkit#readme",
+  "homepage": "https://github.com/iauti/react-native-nitro-filetoolkit#readme",
   "publishConfig": {
+    "access": "public",
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
@@ -73,11 +90,6 @@
     "react": "*",
     "react-native": "*",
     "react-native-nitro-modules": ">=0.37.1 <0.38.0"
-  },
-  "peerDependenciesMeta": {
-    "react-native-nitro-modules": {
-      "optional": true
-    }
   },
   "prettier": {
     "quoteProps": "consistent",

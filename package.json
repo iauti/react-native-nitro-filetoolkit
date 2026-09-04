@@ -9,6 +9,7 @@
   "scripts": {
     "build": "bun run --cwd packages/react-native-nitro-filetoolkit typescript",
     "lint": "bun run --cwd packages/react-native-nitro-filetoolkit lint-ci && bun run --cwd apps/example lint",
+    "package:check": "bun run build && node scripts/validate-package.mjs",
     "specs": "bun run --cwd packages/react-native-nitro-filetoolkit specs",
     "test": "bun run --cwd packages/react-native-nitro-filetoolkit test",
     "typecheck": "bun run --cwd packages/react-native-nitro-filetoolkit typecheck"

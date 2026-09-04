@@ -28,6 +28,12 @@ describe('FileToolkit filesystem', () => {
     expect(() => files.fromUri('https://example.com/a')).toThrow(
       '[file-toolkit/invalid-location]',
     );
+    expect(() => files.fromUri('file:///tmp/%')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
+    expect(files.fromUri('file:///tmp/valid%20name.txt').uri).toBe(
+      'file:///tmp/valid%20name.txt',
+    );
   });
 
   it('returns managed roots and canonical local file URIs', () => {
@@ -39,7 +45,9 @@ describe('FileToolkit filesystem', () => {
     expect(cache.origin).toBe('managed');
     expect(documents.uri.startsWith('file:///')).toBe(true);
     expect(cache.uri.startsWith('file:///')).toBe(true);
-    expect(document.uri.startsWith(`${documents.uri}/`)).toBe(true);
+    expect(
+      document.uri.startsWith(documents.uri.replace(/\/$/, '') + '/'),
+    ).toBe(true);
   });
 
   it('writes, reads, lists, hashes, copies, moves, and removes files', async () => {

@@ -71,6 +71,9 @@ final class FileLocationResolver {
   }
 
   private func url(fromUri uri: String) throws -> URL {
+    guard hasValidURIEncoding(uri) else {
+      throw FileToolkitError.invalidLocation("URI is malformed")
+    }
     guard let url = URL(string: uri), url.isFileURL, url.scheme == "file", url.host == nil else {
       throw FileToolkitError.invalidLocation("only absolute file:// URIs are accepted")
     }
@@ -78,6 +81,34 @@ final class FileLocationResolver {
       throw FileToolkitError.invalidLocation("file URI must contain an absolute path")
     }
     return url.standardizedFileURL
+  }
+
+  private func hasValidURIEncoding(_ value: String) -> Bool {
+    guard !value.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
+      return false
+    }
+
+    let bytes = Array(value.utf8)
+    var index = 0
+    while index < bytes.count {
+      if bytes[index] == 0x25 {
+        guard index + 2 < bytes.count,
+              isHexDigit(bytes[index + 1]),
+              isHexDigit(bytes[index + 2]) else {
+          return false
+        }
+        index += 3
+      } else {
+        index += 1
+      }
+    }
+    return true
+  }
+
+  private func isHexDigit(_ byte: UInt8) -> Bool {
+    (0x30...0x39).contains(byte) ||
+      (0x41...0x46).contains(byte) ||
+      (0x61...0x66).contains(byte)
   }
 
   private func managedRootURLs() throws -> [URL] {

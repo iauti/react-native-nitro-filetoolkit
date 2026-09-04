@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.margelo.nitro.NitroModules
 import java.io.File
+import java.net.URI
 
 internal class FileLocationResolver(
   private val context: Context = requireNotNull(NitroModules.applicationContext) {
@@ -51,11 +52,11 @@ internal class FileLocationResolver(
 
   private fun fileFromUri(value: String): File {
     val uri = try {
-      Uri.parse(value)
+      URI(value)
     } catch (error: Exception) {
       throw FileToolkitException.invalidLocation("URI is malformed", error)
     }
-    if (uri.scheme != "file" || !uri.isAbsolute || !uri.authority.isNullOrEmpty()) {
+    if (uri.scheme != "file" || !uri.isAbsolute || uri.rawAuthority != null) {
       throw FileToolkitException.invalidLocation("only absolute file:// URIs are accepted")
     }
     val path = uri.path

@@ -45,6 +45,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
+    "verify:structure": "node ./scripts/verify-example-structure.mjs",
     "harness": "react-native-harness"
   },
   "private": true

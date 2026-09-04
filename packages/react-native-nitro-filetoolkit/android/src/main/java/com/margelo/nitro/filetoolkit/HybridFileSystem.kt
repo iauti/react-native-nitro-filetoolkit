@@ -27,6 +27,26 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
     sourceResolver.inspect(source)
   }
 
+  override fun importFile(options: ImportFileOptions): Promise<FileInfo> = Promise.parallel {
+    val destination = resolver.file(options.destination)
+    FileOperations.checkCollision(destination, options.collision, metadata)
+    FileOperations.ensureParent(destination, true)
+    val staging = FileOperations.siblingStagingFile(destination)
+    try {
+      sourceResolver.openInput(options.source).use { input ->
+        FileOperations.copyInputToFile(input, staging)
+      }
+      if (options.collision == CollisionPolicy.FAIL) {
+        FileOperations.installNew(staging, destination)
+      } else {
+        FileOperations.atomicReplace(staging, destination, options.atomicity)
+      }
+    } finally {
+      if (metadata.exists(staging)) FileOperations.delete(staging, recursive = true)
+    }
+    metadata.info(destination)
+  }
+
   override fun stat(location: FileLocation): Promise<FileInfo?> = Promise.parallel {
     val file = resolver.file(location)
     if (metadata.exists(file)) metadata.info(file) else null

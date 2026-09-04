@@ -129,6 +129,82 @@ describe('FileToolkit filesystem', () => {
     ).rejects.toThrow('[file-toolkit/invalid-location]');
   });
 
+  it('imports a multi-buffer source with explicit collision behavior', async () => {
+    const sourceLocation = files.location(
+      'temporary',
+      'file-toolkit-harness/import-source.txt',
+    );
+    const destination = files.location(
+      'temporary',
+      'file-toolkit-harness/imported.txt',
+    );
+    const payload = 'source-data-'.repeat(16_384);
+    await files.writeText({
+      destination: sourceLocation,
+      text: payload,
+      encoding: 'utf-8',
+      mode: 'replace',
+      atomicity: 'preferred',
+      createParentDirectories: true,
+    });
+    const source = files.sourceFromUri(sourceLocation.uri);
+
+    const imported = await files.importFile({
+      source,
+      destination,
+      collision: 'fail',
+      atomicity: 'preferred',
+    });
+    expect(imported.byteCount).toBe(BigInt(payload.length));
+    expect(await files.hash({ source: destination, algorithm: 'sha-256' })).toBe(
+      await files.hash({ source: sourceLocation, algorithm: 'sha-256' }),
+    );
+
+    await files.writeText({
+      destination,
+      text: 'preserve-me',
+      encoding: 'utf-8',
+      mode: 'replace',
+      atomicity: 'preferred',
+      createParentDirectories: true,
+    });
+    await expect(
+      files.importFile({
+        source,
+        destination,
+        collision: 'fail',
+        atomicity: 'preferred',
+      }),
+    ).rejects.toThrow('[file-toolkit/invalid-operation]');
+    expect(
+      await files.readText({
+        source: destination,
+        encoding: 'utf-8',
+        maxByteCount: 32n,
+      }),
+    ).toBe('preserve-me');
+
+    const replaced = await files.importFile({
+      source,
+      destination,
+      collision: 'replace',
+      atomicity: 'preferred',
+    });
+    expect(replaced.byteCount).toBe(BigInt(payload.length));
+    expect(await files.hash({ source: destination, algorithm: 'sha-256' })).toBe(
+      await files.hash({ source: sourceLocation, algorithm: 'sha-256' }),
+    );
+
+    const page = await files.list({
+      directory: testRoot,
+      recursive: false,
+      maxEntryCount: 100n,
+    });
+    expect(
+      page.items.some(item => item.name.startsWith('.nitro-filetoolkit-')),
+    ).toBe(false);
+  });
+
   it('canonicalizes Android content source schemes', () => {
     if (Platform.OS !== 'android') return;
 

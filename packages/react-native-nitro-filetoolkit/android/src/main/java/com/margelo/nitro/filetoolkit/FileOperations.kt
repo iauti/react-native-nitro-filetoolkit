@@ -4,6 +4,7 @@ import android.system.Os
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.security.MessageDigest
 import java.util.UUID
 
@@ -26,6 +27,14 @@ internal object FileOperations {
     if (!metadata.exists(destination)) return
     if (policy == CollisionPolicy.FAIL) {
       throw FileToolkitException.invalidOperation("destination already exists")
+    }
+  }
+
+  fun copyInputToFile(input: InputStream, destination: File) {
+    ensureParent(destination, true)
+    FileOutputStream(destination).use { output ->
+      input.copyTo(output, bufferSize = DEFAULT_BUFFER_SIZE)
+      output.fd.sync()
     }
   }
 

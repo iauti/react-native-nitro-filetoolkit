@@ -43,6 +43,38 @@ final class HybridFileSystem: HybridFileSystemSpec {
     }
   }
 
+  func importFile(options: ImportFileOptions) throws -> Promise<FileInfo> {
+    Promise.parallel(Self.ioQueue) { [resolver, sourceResolver, metadata, fileManager] in
+      let source = try sourceResolver.url(from: options.source)
+      let destination = try resolver.url(from: options.destination)
+      try FileOperations.checkCollision(
+        at: destination,
+        policy: options.collision,
+        fileManager: fileManager
+      )
+      try FileOperations.prepareParent(of: destination, create: true, fileManager: fileManager)
+      let staging = FileOperations.siblingStagingURL(for: destination)
+      defer { try? fileManager.removeItem(at: staging) }
+
+      try FileOperations.copyFile(from: source, to: staging, fileManager: fileManager)
+      if options.collision == .fail {
+        try FileOperations.installNewStagingItem(
+          staging,
+          destination: destination,
+          fileManager: fileManager
+        )
+      } else {
+        try FileOperations.replaceStagingItem(
+          staging,
+          destination: destination,
+          atomicity: options.atomicity,
+          fileManager: fileManager
+        )
+      }
+      return try metadata.info(for: destination)
+    }
+  }
+
   func stat(location: FileLocation) throws -> Promise<FileInfo?> {
     Promise.parallel(Self.ioQueue) { [resolver, metadata] in
       let url = try resolver.url(from: location)

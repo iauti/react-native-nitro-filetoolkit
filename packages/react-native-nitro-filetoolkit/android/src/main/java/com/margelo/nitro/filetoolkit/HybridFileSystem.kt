@@ -142,11 +142,7 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
   }
 
   override fun copy(options: CopyOptions): Promise<FileInfo> = Promise.parallel {
-    val source = if (options.followSymbolicLinks) {
-      resolver.fileForAccess(options.source)
-    } else {
-      resolver.file(options.source)
-    }
+    val source = resolver.file(options.source)
     val destination = resolver.file(options.destination)
     if (!metadata.exists(source)) {
       throw FileToolkitException.invalidOperation("source does not exist")
@@ -155,7 +151,9 @@ internal class HybridFileSystem : HybridFileSystemSpec() {
     FileOperations.ensureParent(destination, true)
     val staging = FileOperations.siblingStagingFile(destination)
     try {
-      FileOperations.copy(source, staging, options.followSymbolicLinks)
+      FileOperations.copy(source, staging, options.followSymbolicLinks) { nestedSource ->
+        resolver.fileForAccess(nestedSource, options.source.origin)
+      }
       FileOperations.atomicReplace(staging, destination, options.atomicity)
     } finally {
       if (metadata.exists(staging)) FileOperations.delete(staging, true)

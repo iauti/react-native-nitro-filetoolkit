@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URI
 import java.nio.ByteBuffer
-import java.nio.CharBuffer
 import java.nio.charset.CodingErrorAction
 
 internal class FileLocationResolver(
@@ -39,11 +38,13 @@ internal class FileLocationResolver(
   }
 
   // Access resolution follows an existing leaf link and re-checks where managed access lands.
-  fun fileForAccess(location: FileLocation): File {
-    val file = file(location)
-    if (location.origin != FileLocationOrigin.MANAGED || !isSymbolicLink(file)) return file
+  fun fileForAccess(location: FileLocation): File =
+    fileForAccess(file(location), location.origin)
+
+  fun fileForAccess(file: File, origin: FileLocationOrigin): File {
+    if (!isSymbolicLink(file)) return file
     val resolved = canonicalFile(file)
-    if (managedRoots().none { isContainedByRoot(it, resolved) }) {
+    if (origin == FileLocationOrigin.MANAGED && managedRoots().none { isContainedByRoot(it, resolved) }) {
       throw FileToolkitException.invalidLocation("managed symbolic link target is outside all managed directories")
     }
     return resolved
@@ -113,26 +114,27 @@ internal class FileLocationResolver(
 
   private fun decodeRawPath(rawPath: String): String {
     val output = ByteArrayOutputStream(rawPath.length)
-    var literalStart = 0
     var index = 0
     while (index < rawPath.length) {
-      if (rawPath[index] != '%') {
+      if (rawPath[index] == '%') {
+        if (index + 2 >= rawPath.length) {
+          throw FileToolkitException.invalidLocation("URI is malformed")
+        }
+        val decoded = (hexValue(rawPath[index + 1]) shl 4) or hexValue(rawPath[index + 2])
+        if (decoded == '/'.code || decoded == '\\'.code || decoded == 0) {
+          throw FileToolkitException.invalidLocation("file URI contains an unsafe encoded path character")
+        }
+        output.write(decoded)
+        index += 3
+      } else {
+        val character = rawPath[index]
+        if (character.code > 0x7f) {
+          throw FileToolkitException.invalidLocation("file URI must percent-encode non-ASCII characters")
+        }
+        output.write(character.code)
         index += 1
-        continue
       }
-      appendUtf8(output, rawPath.substring(literalStart, index))
-      if (index + 2 >= rawPath.length) {
-        throw FileToolkitException.invalidLocation("URI is malformed")
-      }
-      val decoded = (hexValue(rawPath[index + 1]) shl 4) or hexValue(rawPath[index + 2])
-      if (decoded == '/'.code || decoded == '\\'.code || decoded == 0) {
-        throw FileToolkitException.invalidLocation("file URI contains an unsafe encoded path character")
-      }
-      output.write(decoded)
-      index += 3
-      literalStart = index
     }
-    appendUtf8(output, rawPath.substring(literalStart))
     return try {
       Charsets.UTF_8.newDecoder()
         .onMalformedInput(CodingErrorAction.REPORT)
@@ -142,20 +144,6 @@ internal class FileLocationResolver(
     } catch (error: Exception) {
       throw FileToolkitException.invalidLocation("file URI path is not valid UTF-8", error)
     }
-  }
-
-  private fun appendUtf8(output: ByteArrayOutputStream, value: String) {
-    val encoded = try {
-      Charsets.UTF_8.newEncoder()
-        .onMalformedInput(CodingErrorAction.REPORT)
-        .onUnmappableCharacter(CodingErrorAction.REPORT)
-        .encode(CharBuffer.wrap(value))
-    } catch (error: Exception) {
-      throw FileToolkitException.invalidLocation("file URI path is not valid UTF-8", error)
-    }
-    val bytes = ByteArray(encoded.remaining())
-    encoded.get(bytes)
-    output.write(bytes)
   }
 
   private fun hexValue(character: Char): Int = when (character) {

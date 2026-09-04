@@ -29,12 +29,18 @@ internal object FileOperations {
     }
   }
 
-  fun copy(source: File, destination: File, followSymbolicLinks: Boolean) {
+  fun copy(
+    source: File,
+    destination: File,
+    followSymbolicLinks: Boolean,
+    resolveSourceForAccess: (File) -> File = { it },
+  ) {
     val sourceInfo = FileMetadataMapper().info(source)
     when (sourceInfo.kind) {
       FileKind.SYMBOLIC_LINK -> {
         if (followSymbolicLinks) {
-          copy(source.canonicalFile, destination, true)
+          // Resolve at every level so nested managed links receive the same containment check.
+          copy(resolveSourceForAccess(source), destination, true, resolveSourceForAccess)
         } else {
           ensureParent(destination, true)
           Os.symlink(Os.readlink(source.path), destination.path)
@@ -45,7 +51,7 @@ internal object FileOperations {
           throw FileToolkitException.invalidOperation("cannot create destination directory")
         }
         source.listFiles()?.forEach { child ->
-          copy(child, File(destination, child.name), followSymbolicLinks)
+          copy(child, File(destination, child.name), followSymbolicLinks, resolveSourceForAccess)
         }
       }
       FileKind.FILE -> {

@@ -55,8 +55,14 @@ describe('FileToolkit filesystem', () => {
     expect(() => files.fromUri('file:///tmp/invalid-%C3%28.txt')).toThrow(
       '[file-toolkit/invalid-location]',
     );
+    expect(() => files.fromUri('file:///tmp/raw-café.txt')).toThrow(
+      '[file-toolkit/invalid-location]',
+    );
     expect(files.fromUri('file:///tmp/valid%20name.txt').uri).toBe(
       'file:///tmp/valid%20name.txt',
+    );
+    expect(files.fromUri('file:///tmp/valid-caf%C3%A9.txt').uri).toBe(
+      'file:///tmp/valid-caf%C3%A9.txt',
     );
   });
 

@@ -12,8 +12,10 @@
 
 #include "Atomicity.hpp"
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "JAtomicity.hpp"
 #include "JFileLocation.hpp"
+#include "JFileLocationOrigin.hpp"
 #include "JTextEncoding.hpp"
 #include "JWriteMode.hpp"
 #include "TextEncoding.hpp"

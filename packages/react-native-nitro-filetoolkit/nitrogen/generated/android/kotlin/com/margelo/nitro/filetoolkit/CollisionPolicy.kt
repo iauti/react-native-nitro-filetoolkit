@@ -16,8 +16,8 @@ import com.facebook.proguard.annotations.DoNotStrip
 @DoNotStrip
 @Keep
 enum class CollisionPolicy(@DoNotStrip @Keep val value: Int) {
-  REPLACE(0),
-  FAIL(1);
+  FAIL(0),
+  REPLACE(1);
 
   companion object
 }

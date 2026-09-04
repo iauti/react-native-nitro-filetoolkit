@@ -12,8 +12,10 @@
 
 #include "FileKind.hpp"
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "JFileKind.hpp"
 #include "JFileLocation.hpp"
+#include "JFileLocationOrigin.hpp"
 #include <NitroModules/JInstant.hpp>
 #include <chrono>
 #include <optional>

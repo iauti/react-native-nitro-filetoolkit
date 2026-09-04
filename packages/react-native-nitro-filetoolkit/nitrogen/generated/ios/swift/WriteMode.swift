@@ -17,10 +17,10 @@ public extension WriteMode {
    */
   init?(fromString string: String) {
     switch string {
-      case "create-new":
-        self = .createNew
       case "replace":
         self = .replace
+      case "create-new":
+        self = .createNew
       case "append":
         self = .append
       default:
@@ -33,10 +33,10 @@ public extension WriteMode {
    */
   var stringValue: String {
     switch self {
-      case .createNew:
-        return "create-new"
       case .replace:
         return "replace"
+      case .createNew:
+        return "create-new"
       case .append:
         return "append"
     }

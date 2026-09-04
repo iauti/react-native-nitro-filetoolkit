@@ -56,6 +56,10 @@ namespace margelo::nitro::filetoolkit {
     // Methods
     FileLocation location(ManagedDirectory directory, const std::string& relativePath) override;
     FileLocation fromUri(const std::string& uri) override;
+    FileLocation root(ManagedDirectory directory) override;
+    FileSource sourceFromUri(const std::string& uri) override;
+    std::shared_ptr<Promise<std::optional<SourceInfo>>> inspectSource(const FileSource& source) override;
+    std::shared_ptr<Promise<FileInfo>> importFile(const ImportFileOptions& options) override;
     std::shared_ptr<Promise<std::optional<FileInfo>>> stat(const FileLocation& location) override;
     std::shared_ptr<Promise<FilePage>> list(const ListOptions& options) override;
     std::shared_ptr<Promise<std::string>> readText(const ReadTextOptions& options) override;

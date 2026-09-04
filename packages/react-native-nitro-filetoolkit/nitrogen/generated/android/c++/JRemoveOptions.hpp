@@ -11,7 +11,9 @@
 #include "RemoveOptions.hpp"
 
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "JFileLocation.hpp"
+#include "JFileLocationOrigin.hpp"
 #include "JMissingPolicy.hpp"
 #include "MissingPolicy.hpp"
 #include <string>

@@ -42,12 +42,12 @@ namespace margelo::nitro::filetoolkit {
     static jni::alias_ref<JWriteMode> fromCpp(WriteMode value) {
       static const auto clazz = javaClassStatic();
       switch (value) {
-        case WriteMode::CREATE_NEW:
-          static const auto fieldCREATE_NEW = clazz->getStaticField<JWriteMode>("CREATE_NEW");
-          return clazz->getStaticFieldValue(fieldCREATE_NEW);
         case WriteMode::REPLACE:
           static const auto fieldREPLACE = clazz->getStaticField<JWriteMode>("REPLACE");
           return clazz->getStaticFieldValue(fieldREPLACE);
+        case WriteMode::CREATE_NEW:
+          static const auto fieldCREATE_NEW = clazz->getStaticField<JWriteMode>("CREATE_NEW");
+          return clazz->getStaticFieldValue(fieldCREATE_NEW);
         case WriteMode::APPEND:
           static const auto fieldAPPEND = clazz->getStaticField<JWriteMode>("APPEND");
           return clazz->getStaticFieldValue(fieldAPPEND);

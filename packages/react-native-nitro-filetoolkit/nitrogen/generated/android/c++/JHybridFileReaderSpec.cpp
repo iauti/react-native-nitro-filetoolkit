@@ -9,11 +9,15 @@
 
 // Forward declaration of `FileLocation` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
+// Forward declaration of `FileLocationOrigin` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileLocationOrigin; }
 // Forward declaration of `ReadChunk` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct ReadChunk; }
 
 #include "FileLocation.hpp"
 #include "JFileLocation.hpp"
+#include "FileLocationOrigin.hpp"
+#include "JFileLocationOrigin.hpp"
 #include <string>
 #include "ReadChunk.hpp"
 #include <NitroModules/Promise.hpp>

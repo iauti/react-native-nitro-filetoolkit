@@ -9,6 +9,14 @@
 
 // Forward declaration of `FileLocation` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
+// Forward declaration of `FileLocationOrigin` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileLocationOrigin; }
+// Forward declaration of `FileSource` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct FileSource; }
+// Forward declaration of `FileSourceScheme` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileSourceScheme; }
+// Forward declaration of `SourceInfo` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct SourceInfo; }
 // Forward declaration of `FileInfo` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileInfo; }
 // Forward declaration of `FileKind` to properly resolve imports.
@@ -25,6 +33,12 @@ namespace margelo::nitro::filetoolkit { struct DiskSpace; }
 namespace margelo::nitro::filetoolkit { struct ClearResult; }
 // Forward declaration of `ManagedDirectory` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class ManagedDirectory; }
+// Forward declaration of `ImportFileOptions` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct ImportFileOptions; }
+// Forward declaration of `CollisionPolicy` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class CollisionPolicy; }
+// Forward declaration of `Atomicity` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class Atomicity; }
 // Forward declaration of `ListOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct ListOptions; }
 // Forward declaration of `ReadTextOptions` to properly resolve imports.
@@ -35,16 +49,12 @@ namespace margelo::nitro::filetoolkit { enum class TextEncoding; }
 namespace margelo::nitro::filetoolkit { struct WriteTextOptions; }
 // Forward declaration of `WriteMode` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class WriteMode; }
-// Forward declaration of `Atomicity` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { enum class Atomicity; }
 // Forward declaration of `OpenWriterOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct OpenWriterOptions; }
 // Forward declaration of `CreateDirectoryOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct CreateDirectoryOptions; }
 // Forward declaration of `CopyOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct CopyOptions; }
-// Forward declaration of `CollisionPolicy` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { enum class CollisionPolicy; }
 // Forward declaration of `MoveOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct MoveOptions; }
 // Forward declaration of `RemoveOptions` to properly resolve imports.
@@ -60,11 +70,19 @@ namespace margelo::nitro::filetoolkit { struct ClearManagedDirectoryOptions; }
 
 #include "FileLocation.hpp"
 #include "JFileLocation.hpp"
+#include "FileLocationOrigin.hpp"
+#include "JFileLocationOrigin.hpp"
 #include <string>
-#include "FileInfo.hpp"
+#include "FileSource.hpp"
+#include "JFileSource.hpp"
+#include "FileSourceScheme.hpp"
+#include "JFileSourceScheme.hpp"
+#include "SourceInfo.hpp"
 #include <optional>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
+#include "JSourceInfo.hpp"
+#include "FileInfo.hpp"
 #include "JFileInfo.hpp"
 #include "FileKind.hpp"
 #include "JFileKind.hpp"
@@ -85,6 +103,12 @@ namespace margelo::nitro::filetoolkit { struct ClearManagedDirectoryOptions; }
 #include "JClearResult.hpp"
 #include "ManagedDirectory.hpp"
 #include "JManagedDirectory.hpp"
+#include "ImportFileOptions.hpp"
+#include "JImportFileOptions.hpp"
+#include "CollisionPolicy.hpp"
+#include "JCollisionPolicy.hpp"
+#include "Atomicity.hpp"
+#include "JAtomicity.hpp"
 #include "ListOptions.hpp"
 #include "JListOptions.hpp"
 #include "ReadTextOptions.hpp"
@@ -95,16 +119,12 @@ namespace margelo::nitro::filetoolkit { struct ClearManagedDirectoryOptions; }
 #include "JWriteTextOptions.hpp"
 #include "WriteMode.hpp"
 #include "JWriteMode.hpp"
-#include "Atomicity.hpp"
-#include "JAtomicity.hpp"
 #include "OpenWriterOptions.hpp"
 #include "JOpenWriterOptions.hpp"
 #include "CreateDirectoryOptions.hpp"
 #include "JCreateDirectoryOptions.hpp"
 #include "CopyOptions.hpp"
 #include "JCopyOptions.hpp"
-#include "CollisionPolicy.hpp"
-#include "JCollisionPolicy.hpp"
 #include "MoveOptions.hpp"
 #include "JMoveOptions.hpp"
 #include "RemoveOptions.hpp"
@@ -160,6 +180,48 @@ namespace margelo::nitro::filetoolkit {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JFileLocation>(jni::alias_ref<jni::JString> /* uri */)>("fromUri");
     auto __result = method(_javaPart, jni::make_jstring(uri));
     return __result->toCpp();
+  }
+  FileLocation JHybridFileSystemSpec::root(ManagedDirectory directory) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JFileLocation>(jni::alias_ref<JManagedDirectory> /* directory */)>("root");
+    auto __result = method(_javaPart, JManagedDirectory::fromCpp(directory));
+    return __result->toCpp();
+  }
+  FileSource JHybridFileSystemSpec::sourceFromUri(const std::string& uri) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JFileSource>(jni::alias_ref<jni::JString> /* uri */)>("sourceFromUri");
+    auto __result = method(_javaPart, jni::make_jstring(uri));
+    return __result->toCpp();
+  }
+  std::shared_ptr<Promise<std::optional<SourceInfo>>> JHybridFileSystemSpec::inspectSource(const FileSource& source) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JFileSource> /* source */)>("inspectSource");
+    auto __result = method(_javaPart, JFileSource::fromCpp(source));
+    return [&]() {
+      auto __promise = Promise<std::optional<SourceInfo>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JSourceInfo>(__boxedResult);
+        __promise->resolve(__result != nullptr ? std::make_optional(__result->toCpp()) : std::nullopt);
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<FileInfo>> JHybridFileSystemSpec::importFile(const ImportFileOptions& options) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JImportFileOptions> /* options */)>("importFile");
+    auto __result = method(_javaPart, JImportFileOptions::fromCpp(options));
+    return [&]() {
+      auto __promise = Promise<FileInfo>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JFileInfo>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
   }
   std::shared_ptr<Promise<std::optional<FileInfo>>> JHybridFileSystemSpec::stat(const FileLocation& location) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JFileLocation> /* location */)>("stat");

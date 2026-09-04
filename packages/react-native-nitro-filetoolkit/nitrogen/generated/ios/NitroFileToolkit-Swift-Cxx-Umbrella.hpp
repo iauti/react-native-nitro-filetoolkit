@@ -26,10 +26,16 @@ namespace margelo::nitro::filetoolkit { struct DiskSpace; }
 namespace margelo::nitro::filetoolkit { struct FileInfo; }
 // Forward declaration of `FileKind` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class FileKind; }
+// Forward declaration of `FileLocationOrigin` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileLocationOrigin; }
 // Forward declaration of `FileLocation` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
 // Forward declaration of `FilePage` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FilePage; }
+// Forward declaration of `FileSourceScheme` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileSourceScheme; }
+// Forward declaration of `FileSource` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct FileSource; }
 // Forward declaration of `HashAlgorithm` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class HashAlgorithm; }
 // Forward declaration of `HashOptions` to properly resolve imports.
@@ -42,6 +48,8 @@ namespace margelo::nitro::filetoolkit { class HybridFileSystemSpec; }
 namespace margelo::nitro::filetoolkit { class HybridFileToolkitFactorySpec; }
 // Forward declaration of `HybridFileWriterSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileWriterSpec; }
+// Forward declaration of `ImportFileOptions` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct ImportFileOptions; }
 // Forward declaration of `ListOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct ListOptions; }
 // Forward declaration of `ManagedDirectory` to properly resolve imports.
@@ -58,6 +66,8 @@ namespace margelo::nitro::filetoolkit { struct ReadChunk; }
 namespace margelo::nitro::filetoolkit { struct ReadTextOptions; }
 // Forward declaration of `RemoveOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct RemoveOptions; }
+// Forward declaration of `SourceInfo` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct SourceInfo; }
 // Forward declaration of `TextEncoding` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class TextEncoding; }
 // Forward declaration of `WriteMode` to properly resolve imports.
@@ -76,13 +86,17 @@ namespace margelo::nitro::filetoolkit { struct WriteTextOptions; }
 #include "FileInfo.hpp"
 #include "FileKind.hpp"
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include "FilePage.hpp"
+#include "FileSource.hpp"
+#include "FileSourceScheme.hpp"
 #include "HashAlgorithm.hpp"
 #include "HashOptions.hpp"
 #include "HybridFileReaderSpec.hpp"
 #include "HybridFileSystemSpec.hpp"
 #include "HybridFileToolkitFactorySpec.hpp"
 #include "HybridFileWriterSpec.hpp"
+#include "ImportFileOptions.hpp"
 #include "ListOptions.hpp"
 #include "ManagedDirectory.hpp"
 #include "MissingPolicy.hpp"
@@ -91,6 +105,7 @@ namespace margelo::nitro::filetoolkit { struct WriteTextOptions; }
 #include "ReadChunk.hpp"
 #include "ReadTextOptions.hpp"
 #include "RemoveOptions.hpp"
+#include "SourceInfo.hpp"
 #include "TextEncoding.hpp"
 #include "WriteMode.hpp"
 #include "WriteTextOptions.hpp"

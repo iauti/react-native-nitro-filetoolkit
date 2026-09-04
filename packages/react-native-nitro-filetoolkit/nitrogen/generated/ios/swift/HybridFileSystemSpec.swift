@@ -15,6 +15,10 @@ public protocol HybridFileSystemSpec_protocol: HybridObject {
   // Methods
   func location(directory: ManagedDirectory, relativePath: String) throws -> FileLocation
   func fromUri(uri: String) throws -> FileLocation
+  func root(directory: ManagedDirectory) throws -> FileLocation
+  func sourceFromUri(uri: String) throws -> FileSource
+  func inspectSource(source: FileSource) throws -> Promise<SourceInfo?>
+  func importFile(options: ImportFileOptions) throws -> Promise<FileInfo>
   func stat(location: FileLocation) throws -> Promise<FileInfo?>
   func list(options: ListOptions) throws -> Promise<FilePage>
   func readText(options: ReadTextOptions) throws -> Promise<String>

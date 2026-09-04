@@ -17,8 +17,14 @@
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
 // Forward declaration of `ManagedDirectory` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class ManagedDirectory; }
+// Forward declaration of `FileSource` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct FileSource; }
+// Forward declaration of `SourceInfo` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct SourceInfo; }
 // Forward declaration of `FileInfo` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileInfo; }
+// Forward declaration of `ImportFileOptions` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct ImportFileOptions; }
 // Forward declaration of `FilePage` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FilePage; }
 // Forward declaration of `ListOptions` to properly resolve imports.
@@ -53,9 +59,12 @@ namespace margelo::nitro::filetoolkit { struct ClearManagedDirectoryOptions; }
 #include "FileLocation.hpp"
 #include "ManagedDirectory.hpp"
 #include <string>
-#include "FileInfo.hpp"
+#include "FileSource.hpp"
+#include "SourceInfo.hpp"
 #include <optional>
 #include <NitroModules/Promise.hpp>
+#include "FileInfo.hpp"
+#include "ImportFileOptions.hpp"
 #include "FilePage.hpp"
 #include "ListOptions.hpp"
 #include "ReadTextOptions.hpp"
@@ -106,6 +115,10 @@ namespace margelo::nitro::filetoolkit {
       // Methods
       virtual FileLocation location(ManagedDirectory directory, const std::string& relativePath) = 0;
       virtual FileLocation fromUri(const std::string& uri) = 0;
+      virtual FileLocation root(ManagedDirectory directory) = 0;
+      virtual FileSource sourceFromUri(const std::string& uri) = 0;
+      virtual std::shared_ptr<Promise<std::optional<SourceInfo>>> inspectSource(const FileSource& source) = 0;
+      virtual std::shared_ptr<Promise<FileInfo>> importFile(const ImportFileOptions& options) = 0;
       virtual std::shared_ptr<Promise<std::optional<FileInfo>>> stat(const FileLocation& location) = 0;
       virtual std::shared_ptr<Promise<FilePage>> list(const ListOptions& options) = 0;
       virtual std::shared_ptr<Promise<std::string>> readText(const ReadTextOptions& options) = 0;

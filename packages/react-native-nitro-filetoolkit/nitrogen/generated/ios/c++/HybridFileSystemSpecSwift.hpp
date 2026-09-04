@@ -14,12 +14,26 @@ namespace NitroFileToolkit { class HybridFileSystemSpec_cxx; }
 
 // Forward declaration of `FileLocation` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileLocation; }
+// Forward declaration of `FileLocationOrigin` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileLocationOrigin; }
 // Forward declaration of `ManagedDirectory` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class ManagedDirectory; }
+// Forward declaration of `FileSource` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct FileSource; }
+// Forward declaration of `FileSourceScheme` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class FileSourceScheme; }
+// Forward declaration of `SourceInfo` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct SourceInfo; }
 // Forward declaration of `FileInfo` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FileInfo; }
 // Forward declaration of `FileKind` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class FileKind; }
+// Forward declaration of `ImportFileOptions` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { struct ImportFileOptions; }
+// Forward declaration of `CollisionPolicy` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class CollisionPolicy; }
+// Forward declaration of `Atomicity` to properly resolve imports.
+namespace margelo::nitro::filetoolkit { enum class Atomicity; }
 // Forward declaration of `FilePage` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct FilePage; }
 // Forward declaration of `ListOptions` to properly resolve imports.
@@ -32,8 +46,6 @@ namespace margelo::nitro::filetoolkit { enum class TextEncoding; }
 namespace margelo::nitro::filetoolkit { struct WriteTextOptions; }
 // Forward declaration of `WriteMode` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { enum class WriteMode; }
-// Forward declaration of `Atomicity` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { enum class Atomicity; }
 // Forward declaration of `HybridFileReaderSpec` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { class HybridFileReaderSpec; }
 // Forward declaration of `HybridFileWriterSpec` to properly resolve imports.
@@ -44,8 +56,6 @@ namespace margelo::nitro::filetoolkit { struct OpenWriterOptions; }
 namespace margelo::nitro::filetoolkit { struct CreateDirectoryOptions; }
 // Forward declaration of `CopyOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct CopyOptions; }
-// Forward declaration of `CollisionPolicy` to properly resolve imports.
-namespace margelo::nitro::filetoolkit { enum class CollisionPolicy; }
 // Forward declaration of `MoveOptions` to properly resolve imports.
 namespace margelo::nitro::filetoolkit { struct MoveOptions; }
 // Forward declaration of `RemoveOptions` to properly resolve imports.
@@ -64,13 +74,20 @@ namespace margelo::nitro::filetoolkit { struct ClearResult; }
 namespace margelo::nitro::filetoolkit { struct ClearManagedDirectoryOptions; }
 
 #include "FileLocation.hpp"
+#include "FileLocationOrigin.hpp"
 #include <string>
 #include "ManagedDirectory.hpp"
-#include "FileInfo.hpp"
+#include "FileSource.hpp"
+#include "FileSourceScheme.hpp"
+#include "SourceInfo.hpp"
 #include <optional>
 #include <NitroModules/Promise.hpp>
+#include "FileInfo.hpp"
 #include "FileKind.hpp"
 #include <chrono>
+#include "ImportFileOptions.hpp"
+#include "CollisionPolicy.hpp"
+#include "Atomicity.hpp"
 #include "FilePage.hpp"
 #include <vector>
 #include "ListOptions.hpp"
@@ -78,14 +95,12 @@ namespace margelo::nitro::filetoolkit { struct ClearManagedDirectoryOptions; }
 #include "TextEncoding.hpp"
 #include "WriteTextOptions.hpp"
 #include "WriteMode.hpp"
-#include "Atomicity.hpp"
 #include <memory>
 #include "HybridFileReaderSpec.hpp"
 #include "HybridFileWriterSpec.hpp"
 #include "OpenWriterOptions.hpp"
 #include "CreateDirectoryOptions.hpp"
 #include "CopyOptions.hpp"
-#include "CollisionPolicy.hpp"
 #include "MoveOptions.hpp"
 #include "RemoveOptions.hpp"
 #include "MissingPolicy.hpp"
@@ -155,6 +170,38 @@ namespace margelo::nitro::filetoolkit {
     }
     inline FileLocation fromUri(const std::string& uri) override {
       auto __result = _swiftPart.fromUri(uri);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline FileLocation root(ManagedDirectory directory) override {
+      auto __result = _swiftPart.root(static_cast<int>(directory));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline FileSource sourceFromUri(const std::string& uri) override {
+      auto __result = _swiftPart.sourceFromUri(uri);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::optional<SourceInfo>>> inspectSource(const FileSource& source) override {
+      auto __result = _swiftPart.inspectSource(std::forward<decltype(source)>(source));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<FileInfo>> importFile(const ImportFileOptions& options) override {
+      auto __result = _swiftPart.importFile(std::forward<decltype(options)>(options));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

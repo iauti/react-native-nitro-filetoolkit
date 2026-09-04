@@ -40,6 +40,22 @@ abstract class HybridFileSystemSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
+  abstract fun root(directory: ManagedDirectory): FileLocation
+  
+  @DoNotStrip
+  @Keep
+  abstract fun sourceFromUri(uri: String): FileSource
+  
+  @DoNotStrip
+  @Keep
+  abstract fun inspectSource(source: FileSource): Promise<SourceInfo?>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun importFile(options: ImportFileOptions): Promise<FileInfo>
+  
+  @DoNotStrip
+  @Keep
   abstract fun stat(location: FileLocation): Promise<FileInfo?>
   
   @DoNotStrip

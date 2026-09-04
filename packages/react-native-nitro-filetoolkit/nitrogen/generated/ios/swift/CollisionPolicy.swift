@@ -17,10 +17,10 @@ public extension CollisionPolicy {
    */
   init?(fromString string: String) {
     switch string {
-      case "replace":
-        self = .replace
       case "fail":
         self = .fail
+      case "replace":
+        self = .replace
       default:
         return nil
     }
@@ -31,10 +31,10 @@ public extension CollisionPolicy {
    */
   var stringValue: String {
     switch self {
-      case .replace:
-        return "replace"
       case .fail:
         return "fail"
+      case .replace:
+        return "replace"
     }
   }
 }

@@ -1,6 +1,10 @@
 import Foundation
 
 final class FileLocationResolver {
+  private static let allowedFileURIBytes = Set(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~!$&'()*+,;=:@/".utf8
+  )
+
   private let fileManager: FileManager
 
   init(fileManager: FileManager = .default) {
@@ -71,7 +75,7 @@ final class FileLocationResolver {
   }
 
   private func url(fromUri uri: String) throws -> URL {
-    guard hasValidURIEncoding(uri) else {
+    guard hasValidFileURICharacters(uri) else {
       throw FileToolkitError.invalidLocation("URI is malformed")
     }
     guard let url = URL(string: uri), url.isFileURL, url.scheme == "file", url.host == nil else {
@@ -83,11 +87,7 @@ final class FileLocationResolver {
     return url.standardizedFileURL
   }
 
-  private func hasValidURIEncoding(_ value: String) -> Bool {
-    guard !value.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) else {
-      return false
-    }
-
+  private func hasValidFileURICharacters(_ value: String) -> Bool {
     let bytes = Array(value.utf8)
     var index = 0
     while index < bytes.count {
@@ -99,6 +99,9 @@ final class FileLocationResolver {
         }
         index += 3
       } else {
+        guard Self.allowedFileURIBytes.contains(bytes[index]) else {
+          return false
+        }
         index += 1
       }
     }

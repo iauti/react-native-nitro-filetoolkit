@@ -4,201 +4,141 @@
 [![npm](https://img.shields.io/npm/v/react-native-nitro-filetoolkit.svg)](https://www.npmjs.com/package/react-native-nitro-filetoolkit)
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Fast, type-safe native filesystem APIs for React Native, built with
-[Nitro Modules](https://nitro.margelo.com/). Read and write text, stream binary
-data, inspect directories, move files, calculate hashes, and manage app-owned
-storage without a legacy bridge API.
+Native filesystem APIs for React Native on **iOS and Android**, built with
+[Nitro Modules](https://nitro.margelo.com/). Read and write text, process binary
+files in chunks, import picker results, and manage app-owned storage with
+explicit overwrite and failure policies.
 
-This is an IAUTI Labs project and a clean successor to `rn-file-toolkit`. It
-does not preserve the old package's API.
+This IAUTI Labs project is a successor to `rn-file-toolkit` with a new API.
+It is not a drop-in replacement.
 
-## Features
+## Is this the right library?
 
-- Native Swift and Kotlin implementations running work off the JS thread
-- Validated app-owned locations and absolute `file://` URIs
-- Read-only picker sources, including Android `content://` URIs
-- Bounded, staged imports into app-owned storage
-- Bounded text reads and explicit UTF encodings
-- Staged streaming writers with commit and abort semantics
-- Collision, missing-file, and atomicity policies instead of boolean flags
-- Paginated directory listings, metadata, hashing, disk usage, and cleanup
-- `bigint` byte counts and offsets through Nitro's `UInt64`
-- One lazily created filesystem hybrid object
+Use it for local files when you want typed locations, bounded text reads,
+`ArrayBuffer` streaming, staged writers, metadata, hashing, and directory
+operations. Byte counts and offsets use `bigint`.
 
-## Requirements
+Downloads/uploads, ZIP archives, sharing, Photos/MediaStore integration, and
+React hooks are **not implemented**. Expo Go and web are not supported.
+See [alternatives](docs/ALTERNATIVES.md) if you need those features today.
+There are no published comparative benchmarks in this repository.
 
-- React Native with the New Architecture enabled
-- `react-native-nitro-modules >=0.37.1 <0.38.0`
-- iOS or Android; web is not a runtime target
-- An Expo development build when using Expo; Expo Go cannot load custom native
-  modules
+## Install
 
-## Installation
+You need React Native with the New Architecture and
+`react-native-nitro-modules >=0.37.1 <0.38.0`. The repository example uses React
+Native **0.86.3**, Expo **57.0.20**, and Nitro Modules **0.37.1**; this is an
+integration baseline, not a claim that every other version is supported.
+
+### Bare React Native
+
+Run from your app directory:
 
 ```bash
-npm install react-native-nitro-filetoolkit react-native-nitro-modules
+npm install react-native-nitro-filetoolkit react-native-nitro-modules@0.37.1
+cd ios
+pod install
+cd ..
 ```
 
-Or with Bun:
+Skip the pod commands on Android. Rebuild and launch your native app using
+its usual iOS or Android build command. A Metro reload cannot install native code.
+
+### Expo
+
+Use a native development build:
 
 ```bash
-bun add react-native-nitro-filetoolkit react-native-nitro-modules
-```
-
-For a bare React Native iOS application, install pods after adding the package:
-
-```bash
-cd ios && pod install
-```
-
-For Expo, install the native dependencies and create a development build:
-
-```bash
-npx expo install react-native-nitro-filetoolkit react-native-nitro-modules
-npx expo prebuild
+npx expo install react-native-nitro-filetoolkit react-native-nitro-modules@0.37.1
 npx expo run:ios
-# or: npx expo run:android
+# Or, for Android:
+npx expo run:android
 ```
 
-## Quick start
+The Expo run command generates native projects if they are absent. If your app
+manages native projects manually, update those projects using your existing
+workflow. Rebuild after installing or changing native dependencies.
+
+## Write and read your first file
+
+Put this function in a native screen or utility file and call it from a button
+handler, for example `onPress={() => void saveAndReadNote().catch(console.error)}`.
 
 ```ts
 import { FileToolkit } from 'react-native-nitro-filetoolkit'
 
-const files = FileToolkit.getFileSystem()
-const note = files.location('documents', 'notes/hello.txt')
+export async function saveAndReadNote(): Promise<string> {
+  const files = FileToolkit.getFileSystem()
+  const note = files.location('documents', 'notes/hello.txt')
 
-await files.writeText({
-  destination: note,
-  text: 'Hello from Nitro',
-  encoding: 'utf-8',
-  mode: 'replace',
-  atomicity: 'preferred',
-  createParentDirectories: true,
-})
+  await files.writeText({
+    destination: note,
+    text: 'Hello from Nitro',
+    encoding: 'utf-8',
+    mode: 'replace',
+    atomicity: 'required',
+    createParentDirectories: true,
+  })
 
-const text = await files.readText({
-  source: note,
-  encoding: 'utf-8',
-  maxByteCount: 1_048_576n,
-})
-
-const info = await files.stat(note)
-const sha256 = await files.hash({ source: note, algorithm: 'sha-256' })
-```
-
-`location()` accepts a managed root plus a portable relative path. `root()`
-returns the root itself. Use `fromUri()` for absolute local `file://` locations.
-
-## Import an external source
-
-Picker/share URIs are read-only `FileSource` capabilities. Android accepts
-`file://` and `content://`; iOS accepts `file://`. Import a source before using
-regular local file operations:
-
-```ts
-const source = files.sourceFromUri(pickerUri)
-const sourceInfo = await files.inspectSource(source)
-if (sourceInfo === undefined) throw new Error('The selected file is unavailable')
-
-if (sourceInfo.byteCount === undefined) {
-  // Import first, then use the returned local FileInfo.byteCount.
-}
-
-const imported = await files.importFile({
-  source,
-  destination: files.location('documents', 'imports/selected-file'),
-  collision: 'fail',
-  atomicity: 'preferred',
-})
-```
-
-`collision: 'fail'` preserves an existing destination; `'replace'` installs
-the new file through a sibling staging item. The toolkit does not persist or
-renew Android `content://` grants, so import while the app holds permission.
-
-## Migration notes for this breaking API
-
-- `FileLocation` now includes `origin: 'managed' | 'uri'`. Replace hand-authored
-  objects with `location()`, `root()`, or `fromUri()`.
-- Android `documents` now maps directly to `Context.filesDir`.
-- Convert picker/share URIs with `sourceFromUri()` and copy them locally with
-  `importFile()`; do not pass them to writable location APIs.
-- Android `content://` grants are not persisted by the toolkit.
-
-## Streaming binary data
-
-Readers and writers own native resources. Close them in `finally` blocks. A
-writer changes the destination only after `commit()` succeeds; `abort()` or
-`close()` discards its staging file.
-
-```ts
-const source = files.location('cache', 'input.bin')
-const destination = files.location('documents', 'output.bin')
-const reader = await files.openReader(source)
-const writer = await files.openWriter({
-  destination,
-  mode: 'replace',
-  atomicity: 'preferred',
-  createParentDirectories: true,
-})
-
-try {
-  while (true) {
-    const chunk = await reader.read(64n * 1024n)
-    if (chunk.data.byteLength > 0) await writer.write(chunk.data)
-    if (chunk.isEndOfFile) break
-  }
-  await writer.commit()
-} catch (error) {
-  await writer.abort()
-  throw error
-} finally {
-  reader.close()
-  writer.close()
+  const text = await files.readText({
+    source: note,
+    encoding: 'utf-8',
+    maxByteCount: 1_048_576n,
+  })
+  console.log(text) // Hello from Nitro
+  return text
 }
 ```
 
-## Documentation
+This creates `notes/hello.txt` in your app's documents storage. Running it again
+replaces the file. `location()` builds a reference; the write creates the file
+and missing parent folders. `maxByteCount` limits the encoded file size to 1 MiB.
+The `n` suffix is required because this API uses `bigint`, not `number`.
 
-- [API reference](docs/API.md)
-- [Troubleshooting](docs/TROUBLESHOOTING.md)
-- [Example application](apps/example/README.md)
-- [Contributing](CONTRIBUTING.md)
-- [Release process](docs/RELEASING.md)
-- [Security policy](SECURITY.md)
+`atomicity: 'required'` rejects if atomic installation is unavailable.
+`'preferred'` permits a non-atomic fallback that can remove the old destination
+before the new file is installed. See [write policies](docs/CONCEPTS.md#write-policies).
 
-## Development
+## Choose the next step
+
+| I want to… | Read |
+| --- | --- |
+| Choose a storage folder and understand URIs | [Locations and policies](docs/CONCEPTS.md) |
+| Save JSON, import a picked document, or stream binary data | [Recipes](docs/RECIPES.md) |
+| Find every method, option, and return type | [API reference](docs/API.md) |
+| Compare with Expo FileSystem and other packages | [Alternatives](docs/ALTERNATIVES.md) |
+| Replace an existing filesystem library | [Migration guide](docs/MIGRATION.md) |
+| Fix setup or runtime errors | [Troubleshooting](docs/TROUBLESHOOTING.md) |
+| Try the native playground | [Example application](apps/example/README.md) |
+
+## What to know before using real data
+
+- Managed roots are app-owned. `downloads` is an app folder, not the device's
+  public Downloads directory.
+- Use `location()` and `root()` for app files; `fromUri()` accepts absolute
+  local `file://` URIs and does not grant filesystem permission.
+- Picker/share results are read-only sources. Use `sourceFromUri()` followed
+  by `importFile()` to obtain a local file. Android also accepts `content://` sources.
+- Close readers and writers in `finally`. A writer stages data until `commit()`;
+  use `abort()` after a failed write or commit.
+- `stat()` returns `undefined` for a missing entry. Optional metadata, including
+  byte counts, must be checked before use.
+
+## Contributing
+
+See [Contributing](CONTRIBUTING.md) for setup and checks,
+[Releasing](docs/RELEASING.md) for publication, and [Security](SECURITY.md)
+for private vulnerability reports. Start the workspace playground with:
 
 ```bash
-bun install
+bun install --frozen-lockfile
 bun run specs
-bun run test
-bun run typecheck
-bun run lint
-bun run build
-bun run package:check
+bun run --cwd apps/example ios
+# Or: bun run --cwd apps/example android
 ```
 
-The Expo Router example is in `apps/example`. Generated iOS and Android example
-projects intentionally remain untracked and can be recreated with Expo
-prebuild.
-
-## Roadmap
-
-- [x] Managed locations, metadata, and bounded text I/O
-- [x] Streaming readers and staged writers
-- [x] Copy, move, remove, hashing, disk space, and managed cleanup
-- [x] External source inspection and staged local imports
-- [ ] Durable download and upload tasks with retry, progress, and reattachment
-- [ ] Safe ZIP creation and extraction
-- [ ] Share, open-in, Photos, and MediaStore integration
-- [ ] Explicit transfer and WebView cookie stores
-- [ ] React hooks over durable task snapshots
-
-Roadmap items are intentionally not exported as placeholder APIs. Each domain
-will be added only when its iOS and Android behavior, lifecycle, and tests are
-ready to ship.
+Future work includes durable transfers, archives, sharing and media integration,
+cookie stores, and React task hooks. These are roadmap items, not exported APIs.
 
 ## License
 

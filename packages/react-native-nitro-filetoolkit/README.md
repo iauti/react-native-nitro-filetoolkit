@@ -1,192 +1,133 @@
 # React Native Nitro File Toolkit
 
-Fast, type-safe native filesystem APIs for React Native, powered by
-[Nitro Modules](https://nitro.margelo.com/).
+[![CI](https://github.com/iauti/react-native-nitro-filetoolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/iauti/react-native-nitro-filetoolkit/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/react-native-nitro-filetoolkit.svg)](https://www.npmjs.com/package/react-native-nitro-filetoolkit)
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-## Why use it?
+Native filesystem APIs for React Native on **iOS and Android**, built with
+[Nitro Modules](https://nitro.margelo.com/). Read and write text, process binary
+files in chunks, import picker results, and manage app-owned storage with
+explicit overwrite and failure policies.
 
-- Swift and Kotlin filesystem operations outside the JS thread
-- Validated app-owned paths and absolute `file://` URIs
-- Read-only external sources, including Android `content://` URIs
-- Bounded, staged imports into app-owned storage
-- Bounded text reads and staged binary streaming
-- Explicit collision, missing-file, write, and atomicity policies
-- Paginated listing, metadata, hashing, disk-space, and cleanup APIs
-- Native 64-bit byte counts exposed as TypeScript `bigint`
+This IAUTI Labs project is a successor to `rn-file-toolkit` with a new API.
+It is not a drop-in replacement.
 
-This IAUTI Labs package is a clean successor to `rn-file-toolkit`; it is not
-API-compatible with that library.
+## Is this the right library?
 
-## Requirements
+Use it for local files when you want typed locations, bounded text reads,
+`ArrayBuffer` streaming, staged writers, metadata, hashing, and directory
+operations. Byte counts and offsets use `bigint`.
 
-- React Native New Architecture
-- `react-native-nitro-modules >=0.37.1 <0.38.0`
-- iOS or Android
-- Expo development build for Expo projects; Expo Go is not supported
+Downloads/uploads, ZIP archives, sharing, Photos/MediaStore integration, and
+React hooks are **not implemented**. Expo Go and web are not supported.
+See [alternatives](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/ALTERNATIVES.md) if you need those features today.
+There are no published comparative benchmarks in this repository.
 
 ## Install
 
+You need React Native with the New Architecture and
+`react-native-nitro-modules >=0.37.1 <0.38.0`. The repository example uses React
+Native **0.86.3**, Expo **57.0.20**, and Nitro Modules **0.37.1**; this is an
+integration baseline, not a claim that every other version is supported.
+
+### Bare React Native
+
+Run from your app directory:
+
 ```bash
-npm install react-native-nitro-filetoolkit react-native-nitro-modules
+npm install react-native-nitro-filetoolkit react-native-nitro-modules@0.37.1
+cd ios
+pod install
+cd ..
 ```
 
-```bash
-bun add react-native-nitro-filetoolkit react-native-nitro-modules
-```
+Skip the pod commands on Android. Rebuild and launch your native app using
+its usual iOS or Android build command. A Metro reload cannot install native code.
 
-Bare React Native iOS projects must run `pod install`. Expo projects should
-generate and run a development build:
+### Expo
+
+Use a native development build:
 
 ```bash
-npx expo install react-native-nitro-filetoolkit react-native-nitro-modules
-npx expo prebuild
+npx expo install react-native-nitro-filetoolkit react-native-nitro-modules@0.37.1
 npx expo run:ios
-# or: npx expo run:android
+# Or, for Android:
+npx expo run:android
 ```
 
-## Quick start
+The Expo run command generates native projects if they are absent. If your app
+manages native projects manually, update those projects using your existing
+workflow. Rebuild after installing or changing native dependencies.
+
+## Write and read your first file
+
+Put this function in a native screen or utility file and call it from a button
+handler, for example `onPress={() => void saveAndReadNote().catch(console.error)}`.
 
 ```ts
 import { FileToolkit } from 'react-native-nitro-filetoolkit'
 
-const files = FileToolkit.getFileSystem()
-const report = files.location('documents', 'reports/annual.txt')
+export async function saveAndReadNote(): Promise<string> {
+  const files = FileToolkit.getFileSystem()
+  const note = files.location('documents', 'notes/hello.txt')
 
-await files.writeText({
-  destination: report,
-  text: 'Annual report',
-  encoding: 'utf-8',
-  mode: 'replace',
-  atomicity: 'preferred',
-  createParentDirectories: true,
-})
+  await files.writeText({
+    destination: note,
+    text: 'Hello from Nitro',
+    encoding: 'utf-8',
+    mode: 'replace',
+    atomicity: 'required',
+    createParentDirectories: true,
+  })
 
-const contents = await files.readText({
-  source: report,
-  encoding: 'utf-8',
-  maxByteCount: 1_048_576n,
-})
-
-const info = await files.stat(report)
-const digest = await files.hash({ source: report, algorithm: 'sha-256' })
-```
-
-## Import a picker result
-
-Treat picker/share URIs as read-only capabilities, not writable filesystem
-locations. Android supports `content://` and `file://` sources; iOS supports
-`file://` sources:
-
-```ts
-const source = files.sourceFromUri(pickerUri)
-const sourceInfo = await files.inspectSource(source)
-if (sourceInfo === undefined) throw new Error('The selected file is unavailable')
-
-const imported = await files.importFile({
-  source,
-  destination: files.location('documents', 'imports/report.pdf'),
-  collision: 'replace',
-  atomicity: 'preferred',
-})
-
-console.log(imported.byteCount)
-```
-
-`sourceInfo.byteCount` may be `undefined` when a provider does not report a
-size. The returned local `FileInfo` describes the completed import. The toolkit
-does not persist or renew Android `content://` grants.
-
-## Common operations
-
-```ts
-const archive = files.location('documents', 'archive')
-await files.createDirectory({
-  location: archive,
-  createParentDirectories: true,
-})
-
-const page = await files.list({
-  directory: archive,
-  maxEntryCount: 100n,
-  recursive: false,
-})
-
-const copy = files.location('documents', 'archive/report-copy.txt')
-await files.copy({
-  source: report,
-  destination: copy,
-  collision: 'replace',
-  atomicity: 'preferred',
-  followSymbolicLinks: false,
-})
-
-await files.remove({
-  location: copy,
-  recursive: false,
-  missing: 'ignore',
-})
-```
-
-## Streaming
-
-Readers and writers own native resources. Always close them. A writer uses a
-staging file and updates its destination only after `commit()` succeeds.
-
-```ts
-const reader = await files.openReader(report)
-const destination = files.location('cache', 'report-copy.bin')
-const writer = await files.openWriter({
-  destination,
-  mode: 'replace',
-  atomicity: 'preferred',
-  createParentDirectories: true,
-})
-
-try {
-  while (true) {
-    const chunk = await reader.read(64n * 1024n)
-    if (chunk.data.byteLength > 0) await writer.write(chunk.data)
-    if (chunk.isEndOfFile) break
-  }
-  await writer.commit()
-} catch (error) {
-  await writer.abort()
-  throw error
-} finally {
-  reader.close()
-  writer.close()
+  const text = await files.readText({
+    source: note,
+    encoding: 'utf-8',
+    maxByteCount: 1_048_576n,
+  })
+  console.log(text) // Hello from Nitro
+  return text
 }
 ```
 
-## Behavior to know
+This creates `notes/hello.txt` in your app's documents storage. Running it again
+replaces the file. `location()` builds a reference; the write creates the file
+and missing parent folders. `maxByteCount` limits the encoded file size to 1 MiB.
+The `n` suffix is required because this API uses `bigint`, not `number`.
 
-- `UInt64` values are `bigint` in TypeScript; use `64n`, not `64`.
-- `readText()` rejects files larger than `maxByteCount` before decoding.
-- `location()` rejects empty paths, absolute paths, backslashes, NUL bytes,
-  empty segments, `.` segments, and `..` segments.
-- `fromUri()` currently accepts absolute `file://` URIs only.
-- `root()` returns a managed root; `FileLocation.origin` is `managed` or `uri`.
-- Use `sourceFromUri()` and `importFile()` for picker/share URIs.
-- Directory-list cursors are opaque. Pass `nextCursor` back unchanged.
-- `atomicity: 'required'` fails if the platform cannot guarantee the requested
-  operation atomically; `'preferred'` may fall back where supported.
+`atomicity: 'required'` rejects if atomic installation is unavailable.
+`'preferred'` permits a non-atomic fallback that can remove the old destination
+before the new file is installed. See [write policies](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/CONCEPTS.md#write-policies).
 
-Full documentation and runnable examples:
-[github.com/iauti/react-native-nitro-filetoolkit](https://github.com/iauti/react-native-nitro-filetoolkit).
+## Choose the next step
 
-## Roadmap
+| I want to… | Read |
+| --- | --- |
+| Choose a storage folder and understand URIs | [Locations and policies](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/CONCEPTS.md) |
+| Save JSON, import a picked document, or stream binary data | [Recipes](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/RECIPES.md) |
+| Find every method, option, and return type | [API reference](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/API.md) |
+| Compare with Expo FileSystem and other packages | [Alternatives](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/ALTERNATIVES.md) |
+| Replace an existing filesystem library | [Migration guide](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/MIGRATION.md) |
+| Fix setup or runtime errors | [Troubleshooting](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/docs/TROUBLESHOOTING.md) |
+| Try the native playground | [Example application](https://github.com/iauti/react-native-nitro-filetoolkit/blob/HEAD/apps/example/README.md) |
 
-- [x] Filesystem locations, text and binary I/O, metadata, and mutations
-- [x] Hashing, disk-space reporting, and managed-directory cleanup
-- [x] Android content-source inspection and staged local imports
-- [ ] Durable downloads and uploads
-- [ ] Safe archive creation and extraction
-- [ ] Sharing, external opening, Photos, and MediaStore
-- [ ] Transfer and WebView cookie stores
-- [ ] React task hooks
+## What to know before using real data
 
-Unchecked domains are not placeholder exports; they will enter the public API
-only after both native implementations and behavior tests are complete.
+- Managed roots are app-owned. `downloads` is an app folder, not the device's
+  public Downloads directory.
+- Use `location()` and `root()` for app files; `fromUri()` accepts absolute
+  local `file://` URIs and does not grant filesystem permission.
+- Picker/share results are read-only sources. Use `sourceFromUri()` followed
+  by `importFile()` to obtain a local file. Android also accepts `content://` sources.
+- Close readers and writers in `finally`. A writer stages data until `commit()`;
+  use `abort()` after a failed write or commit.
+- `stat()` returns `undefined` for a missing entry. Optional metadata, including
+  byte counts, must be checked before use.
+
+## Contributing
+
+See the [repository](https://github.com/iauti/react-native-nitro-filetoolkit)
+for the example app, contribution instructions, release process, and roadmap.
 
 ## License
 

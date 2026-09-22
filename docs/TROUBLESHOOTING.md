@@ -1,14 +1,16 @@
 # Troubleshooting
 
+[Documentation](README.md) · [Quick start](../README.md) · [API](API.md)
+
 ## The native module cannot be found
 
 Symptoms include `HybridObject ... was not found`, autolinking errors, or a
-screen that works on web but fails on iOS/Android.
+failure when importing the package outside a native runtime.
 
 1. Confirm both packages are installed:
 
    ```bash
-   npm install react-native-nitro-filetoolkit react-native-nitro-modules
+   npm install react-native-nitro-filetoolkit react-native-nitro-modules@0.37.1
    ```
 
 2. Rebuild the native application after installation. Reloading JavaScript is
@@ -66,14 +68,42 @@ Choose the intended policy explicitly:
 
 `atomicity: 'required'` promises failure instead of a non-atomic fallback. This
 can occur when moving across volumes or when the platform cannot replace the
-destination atomically. Use `preferred` only if a safe fallback matches your
-application's durability requirements.
+destination atomically. Use `preferred` only if a non-atomic fallback matches your
+application's requirements: a failed fallback can leave the old destination
+removed. `required` does not make text append atomic; see [policies](CONCEPTS.md#write-policies).
 
 ## A reader or writer is closed
 
 Readers cannot be used after `close()`. Writers cannot be used after
 `commit()`, `abort()`, or `close()`. Create a new instance for another operation
 and keep cleanup in a `finally` block.
+
+## TypeScript rejects `1024n`, or JSON serialization fails
+
+Byte counts and offsets require `bigint` (for example, `1024n`). Use a TypeScript
+target of ES2020 or newer and a React Native runtime supporting BigInt. Do not
+change examples to ordinary numbers to silence the error. For logging or JSON,
+convert counts to strings with `.toString()`; `JSON.stringify()` cannot serialize
+raw `bigint` values. Timestamps are `Date` values when present.
+
+## Files do not appear in the device's Downloads app
+
+The `downloads` root is private app-owned storage. Public Downloads, sharing,
+Photos, and MediaStore need a separate integration. See [alternatives](ALTERNATIVES.md).
+
+## A streaming write did not create the destination
+
+`write()` and `flush()` only affect staging. Await `commit()` to install the
+result. On a failed write or commit, call `abort()` before closing. Use the
+[streaming recipe](RECIPES.md#stream-a-binary-file) so cleanup also covers failure
+to open a writer. Staging and streaming append need extra disk space.
+
+## Tests fail when importing the package in Node or Jest
+
+The module creates a Nitro factory when imported. Node/Jest has no native
+runtime, and this package does not ship a filesystem mock. Mock your app's
+filesystem adapter in unit tests; run native behavior checks in the example's
+[Harness setup](../apps/example/README.md#checks).
 
 ## Still blocked
 

@@ -45,7 +45,7 @@
     "lint-ci": "eslint \"src/**/*.ts\" \"tests/**/*.ts\" --max-warnings 0",
     "release": "release-it",
     "test": "tsc -p tests/tsconfig.json --noEmit",
-    "typescript": "tsc",
+    "typescript": "node scripts/build-typescript.mjs",
     "specs": "tsc --noEmit false && nitrogen --logLevel=\"debug\"",
     "prepack": "bun run specs && bun run test && bun run lint-ci && bun run typescript"
   },

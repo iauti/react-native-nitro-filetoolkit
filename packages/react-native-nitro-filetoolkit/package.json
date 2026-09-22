@@ -1,6 +1,6 @@
 {
   "name": "react-native-nitro-filetoolkit",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Fast, type-safe native filesystem APIs for React Native powered by Nitro Modules",
   "type": "module",
   "main": "./lib/index.js",

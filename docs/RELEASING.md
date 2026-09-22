@@ -3,13 +3,18 @@
 Releases are versioned, tagged, published to npm, and mirrored to GitHub with
 one command from the repository root.
 
+The workspace orchestration follows Margelo's
+[VisionCamera release script](https://github.com/margelo/react-native-vision-camera/blob/91bae1f08d549b50444ee16661dc4f4375cba0b6/scripts/release.sh):
+packages publish sequentially before the root creates the GitHub release.
+
 ## Prerequisites
 
 - Write access to `iauti/react-native-nitro-filetoolkit`.
 - npm publish access for `react-native-nitro-filetoolkit`.
 - An authenticated npm session (`npm whoami`).
-- A GitHub token available to release-it as `GITHUB_TOKEN`, or an authenticated
-  GitHub CLI session supported by the local release environment.
+- A GitHub token supplied as `GITHUB_TOKEN` (preferred), `GH_TOKEN`, or via
+  an authenticated GitHub CLI session (`gh auth login`). The release script
+  exports the selected token as `GITHUB_TOKEN` without printing it.
 - A clean checkout of the latest default branch with all tags fetched.
 - Bun 1.3.3 and Node.js 22.21 or newer for release-it 21.
 
@@ -31,8 +36,13 @@ one command from the repository root.
 
    ```bash
    bun run package:check
-   npm --cache /tmp/nitro-filetoolkit-npm-cache pack --dry-run
+   (cd packages/react-native-nitro-filetoolkit && npm --cache /tmp/nitro-filetoolkit-npm-cache pack --dry-run)
    ```
+
+   `bun run build` (also used by the release gate and package prepack) removes
+   only generated `lib/` output and forces a TypeScript project rebuild. This
+   prevents obsolete files or an incremental cache from producing an incomplete
+   package. Inspect the nested package's tarball, not the private root package.
 
 ## Dry run
 
@@ -51,10 +61,21 @@ the generated changelog before continuing.
 bun release
 ```
 
-The package release step updates and publishes the nested npm package. The root
-release step updates the workspace version, changelog, lockfile, release commit,
-tag, push, and GitHub release. Confirm every interactive prompt before allowing
-publication.
+The script checks GitHub authentication, then runs `bun run check:ci` from the
+root before any npm publication. It releases each package under `packages/`
+sequentially and finally runs root `release-it`. All arguments are forwarded to
+both package and root release commands; use the same version choice at each
+interactive prompt (or an explicit version/increment argument).
+
+The package release step updates and publishes the nested npm package; it does
+not commit, tag, push, or create a GitHub release. The root release step updates
+the workspace and example versions, changelog, lockfile, release commit, tag,
+push, and GitHub release without publishing the private root package. The root
+bumper synchronizes package metadata to that chosen version; the script adds
+no separate version-bump command. Confirm every interactive prompt before
+allowing publication. A failed step stops the script, but cannot roll back an
+already published npm package. Authentication preflight checks token presence,
+not whether the token has the necessary remote permissions.
 
 ## Verify
 

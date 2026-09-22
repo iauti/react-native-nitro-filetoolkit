@@ -13,7 +13,6 @@
     "releaseName": "v${version}"
   },
   "hooks": {
-    "before:init": "bun run check:ci",
     "after:bump": "bun install && git add package.json packages/react-native-nitro-filetoolkit/package.json apps/example/package.json bun.lock"
   },
   "plugins": {
